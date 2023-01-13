@@ -12,6 +12,6 @@ namespace GameStoreData.Models
         [Required]
         public string Name { get; set; }
 
-        public virtual ICollection<Game> Games { get; set; }
+        public virtual ICollection<Game> Games { get; set; } = new List<Game>();
     }
 }

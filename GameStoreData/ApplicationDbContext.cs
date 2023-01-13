@@ -10,11 +10,17 @@ namespace GameStoreData
 
         public ApplicationDbContext()
         {
+            Database.EnsureCreated();
         }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer("Data Source=(localdb)\\mssqllocaldb;Initial Catalog=GameStoreDB");
         }
     }
 }
