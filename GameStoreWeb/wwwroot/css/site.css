@@ -14,5 +14,37 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+    /*background-color: lightblue;*/
+}
+
+.topcorner {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.games {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    max-height: 520px;
+    padding-top: 5px;
+    align-content: flex-start;
+    position: relative;
+}
+
+img {
+    border: 1px solid;
+    height: 300px;
+    width: 300px;
+    display: inline-block;
+    margin: 0 5px;
+}
+
+
+.details {
+    border: 1px solid;
+    text-align: center;
+    margin: 0 5px 5px;
 }

@@ -4,47 +4,31 @@
     ViewData["Title"] = "ListGames";
 }
 
+
 <h1>ListGames</h1>
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
 
-@*@Html.DisplayFor(modelItem => item.Name)*@
-
-<div id="letters">
+<div class="games">
     @foreach (var item in Model)
     {
-        <img src="$img/{item.Name}" height="100" width="100" alt="image">
-        <p>@item.Price</p>
-        <p>@String.Join("/", new string[] { "RPG", "Adventure" })</p>
-        <p>@item.Name</p>
+        <img src="@item.Image" alt="image">
+        <p class="details">
+            @String.Join("/", item.Genres.Select(g => g.Name))
+            <br>@(item.Name)
+        </p>
+        <p class="details">$@(item.Price)</p>
+        // TODO: ALIGN THESE ACTIONS, CENTER 'EM 
+        <div id="outer">
+            <a id="inner" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+            <a id="inner" asp-action="Details" asp-route-id="@item.Id">Details</a> |
+            <a id="inner" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+        </div>
     }
 </div>
 
-<style>
-    #letters {
-        display: flex;
-        flex-direction: column;
-        flex-wrap: wrap;
-        max-height: 520px;
-        padding-top: 20px;
-        align-content: flex-start;
-        position: relative;
-    }
-
-    img {
-        border: 1px solid;
-        height: 100%;
-        width: 33%;
-        display: inline-block;
-        margin: 0 5px;
-    }
-
-    p {
-        border: 1px solid;
-        text-align: center;
-        margin: 0 5px 5px;
-    }
-</style>
-@*
-<p>
+@*<p>
     <a asp-action="Create">Create New</a>
 </p>
 <body>
@@ -89,16 +73,8 @@
 .image-grid-row-2 {
 	grid-row: span 2;
 }
-
-/* Anything udner 1024px */
-/*media screen and (max-width: 1024px) {
-	.image-grid {
-		--num-cols: 2;
-		--row-height: 200px;
-	}
-}*/
-</style>*@
-<@*table class="table">
+</style>
+<table class="table">
     <thead>
         <tr>
             <th>
@@ -135,5 +111,4 @@
         </tr>
 }
     </tbody>
-</table>
-*@
+</table>*@
