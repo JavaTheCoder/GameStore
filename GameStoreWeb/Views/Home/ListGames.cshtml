@@ -4,10 +4,8 @@
     ViewData["Title"] = "ListGames";
 }
 
-
-<h1>ListGames</h1>
 <p>
-    <a asp-action="Create">Create New</a>
+    <a class="newgame" asp-action="Create">New Game</a>
 </p>
 
 <div class="games">
@@ -27,88 +25,3 @@
         </div>
     }
 </div>
-
-@*<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<body>
-    <div class="image-grid">
-        <img src="/img/horizon-zero-dawn.jpg" alt="image">
-        <img src="/img/horizon-forbidden-west.jpg" alt="image">
-        <img src="/img/witcher3.jpg" alt="image">
-        <img src="/img/tomb-raider.jpg" alt="image">
-        <img src="/img/rise-of-the-tomb-raider.jpg" alt="image">
-        <img src="/img/shadow-of-the-tomb-raider.jpg" alt="image">
-    </div>
-</body>
-<style>
-    body {
-	margin: 0;
-}
-
-.image-grid {
-	--gap: 40px;
-	--num-cols: 3;
-	--row-height: 400px;
-
-	box-sizing: border-box;
-	padding: var(--gap);
-
-	display: grid;
-	grid-template-columns: repeat(var(--num-cols), 1fr);
-	grid-auto-rows: var(--row-height);
-	gap: var(--gap);
-}
-
-.image-grid>img {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-}
-
-.image-grid-col-2 {
-	grid-column: span 2;
-}
-
-.image-grid-row-2 {
-	grid-row: span 2;
-}
-</style>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Price)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Genres)
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-                @foreach(var g in item.Genres) {
-                    @Html.DisplayFor(modelItem => g)
-                }
-            </td>
-
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>*@

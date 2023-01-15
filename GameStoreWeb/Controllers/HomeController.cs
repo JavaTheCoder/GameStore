@@ -20,10 +20,9 @@ namespace GameStoreWeb.Controllers
             _service = service;
         }
 
+        //public async Task<IActionResult> Index()
         public IActionResult Index()
         {
-            //TODO: Add redirection
-
             //var genre1 = new Genre { Name = "RPG" };
             //var genre2 = new Genre { Name = "Adventure" };
             //var game1 = new Game { Name = "Horizon: Zero Dawn", Image = "horizon-zero-dawn", Price = 54.99 };

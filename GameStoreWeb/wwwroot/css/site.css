@@ -42,9 +42,22 @@ img {
     margin: 0 5px;
 }
 
-
 .details {
     border: 1px solid;
     text-align: center;
     margin: 0 5px 5px;
+}
+
+.newgame {
+    background-color: cornflowerblue;
+    color: white;
+    padding: 5px 15px;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+}
+
+.newgame:hover {
+    color: darkblue;
 }
