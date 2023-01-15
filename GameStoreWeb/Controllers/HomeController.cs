@@ -1,7 +1,7 @@
 ﻿using GameStoreData;
+using GameStoreData.Identity.Data;
 using GameStoreData.Models;
 using GameStoreData.Service;
-using GameStoreWeb.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -97,29 +97,9 @@ namespace GameStoreWeb.Controllers
             return RedirectToAction("ListGames");
         }
 
-
-        //public IActionResult ViewToDos(int id)
-        //{
-        //    ViewBag.iD = id;
-        //    return View(_context.ToDoItems.ToList().Where(i => i.ToDoListId == id));
-        //}
-
-        //public IActionResult Delete(int id)
-        //{
-        //    int listId = toDoService.GetToDo(id).ToDoListId;
-        //    toDoService.DeleteToDo(id);
-        //    return new RedirectResult($"~/ToDoItem/ViewTodos/{listId}");
-        //}
-
         public IActionResult Privacy()
         {
             return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

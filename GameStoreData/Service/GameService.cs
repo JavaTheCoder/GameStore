@@ -1,4 +1,5 @@
-﻿using GameStoreData.Models;
+﻿using GameStoreData.Identity.Data;
+using GameStoreData.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameStoreData.Service
@@ -6,7 +7,7 @@ namespace GameStoreData.Service
     public class GameService
     {
         private readonly ApplicationDbContext _context;
-        //   rtgfvb 
+
         public GameService(ApplicationDbContext context)
         {
             _context = context;
