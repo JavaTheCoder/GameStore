@@ -8,8 +8,13 @@
 @if (SignInManager.IsSignedIn(User))
 {
     <li class="nav-item">
-            @*TODO: DISPLAY FIRST/LAST NAMEs AND AVATAR WHEN LOGGED IN*@
-        <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
+            <img src="@UserManager.GetUserAsync(User).Result.ImageURL" class="avatar" 
+            onerror="this.src='https://w0.peakpx.com/wallpaper/709/216/HD-wallpaper-pitch-black-dark.jpg'">
+    </li>
+    <li class="nav-item">
+            <a id="manage" class="nav-link text-dark" asp-area="Identity" 
+            asp-page="/Account/Manage/Index" title="Manage">
+            @UserManager.GetUserAsync(User).Result.FirstName @UserManager.GetUserAsync(User).Result.LastName</a>
     </li>
     <li class="nav-item">
         <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">

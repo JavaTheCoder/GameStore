@@ -95,6 +95,11 @@ namespace GameStoreWeb.Areas.Identity.Pages.Account
             [Display(Name = "Username")]
             public string UserName { get; set; }
 
+            [Required]
+            [DataType(DataType.ImageUrl)]
+            [Display(Name = "ImageURL")]
+            public string ImageURL { get; set; }
+
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -135,6 +140,7 @@ namespace GameStoreWeb.Areas.Identity.Pages.Account
                 // TODO: MAKE EMAIL UNIQUE
                 user.FirstName = Input.FirstName;
                 user.LastName = Input.LastName;
+                user.ImageURL = Input.ImageURL;
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)

@@ -30,8 +30,6 @@ body {
     flex-wrap: wrap;
     max-height: 520px;
     padding-top: 5px;
-    align-content: flex-start;
-    position: relative;
 }
 
 img {
@@ -40,6 +38,12 @@ img {
     width: 300px;
     display: inline-block;
     margin: 0 5px;
+}
+
+.avatar {
+    height: 46px;
+    width: 46px;
+    border-radius: 23px;
 }
 
 .details {
@@ -52,6 +56,7 @@ img {
     background-color: cornflowerblue;
     color: white;
     padding: 5px 15px;
+    margin-top: 20px;
     text-decoration: none;
     cursor: pointer;
     border: none;

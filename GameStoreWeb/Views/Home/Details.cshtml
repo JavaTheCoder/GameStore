@@ -16,11 +16,11 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Name)
         </dd>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Price)
-        </dd>
         <dd class="col-sm-10">
-             @String.Join("/", Model.Genres.Select(g => g.Name))
+            @String.Join("/", Model.Genres.Select(g => g.Name))
+        </dd>
+        <dd class = "col-sm-10">
+            $@Html.DisplayFor(model => model.Price)
         </dd>
     </dl>
 </div>

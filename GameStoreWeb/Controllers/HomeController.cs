@@ -20,7 +20,6 @@ namespace GameStoreWeb.Controllers
             _service = service;
         }
 
-
         //public async Task<IActionResult> Index()
         public IActionResult Index()
         {
@@ -90,6 +89,7 @@ namespace GameStoreWeb.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var game = await _service.GetGameByIdAsync(id);
+            ViewBag.Genres = await _service.GetGenresAsync();
             return View(game);
         }
 
