@@ -8,6 +8,7 @@
 @if (SignInManager.IsSignedIn(User))
 {
     <li class="nav-item">
+            @*TODO: DISPLAY FIRST/LAST NAMEs AND AVATAR WHEN LOGGED IN*@
         <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
     </li>
     <li class="nav-item">
@@ -18,11 +19,11 @@
 }
 else
 {
-    <li class="nav-item"> 
+   @* <li class="nav-item"> 
         <a class="nav-link text-dark" id="register" asp-area="Identity" asp-page="/Account/Register">Register</a>
-    </li>
+    </li>*@
     <li class="nav-item">
-        <a class="nav-link text-dark" id="login" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        <a class="nav-link text-dark" id="login" asp-area="Identity" asp-page="/Account/Login">Sign In</a>
     </li>
 }
 </ul>

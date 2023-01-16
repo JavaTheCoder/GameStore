@@ -20,6 +20,7 @@ namespace GameStoreWeb.Controllers
             _service = service;
         }
 
+
         //public async Task<IActionResult> Index()
         public IActionResult Index()
         {
@@ -46,13 +47,28 @@ namespace GameStoreWeb.Controllers
             //await _context.Games.AddAsync(game2);
 
             //await _context.SaveChangesAsync();
+
+            //var genre1 = new Genre { Name = "Strategy" };
+            //var genre2 = new Genre { Name = "FPS" };
+            //var genre3 = new Genre { Name = "Arcade" };
+            //var genre4 = new Genre { Name = "Sports" };
+            //var genre5 = new Genre { Name = "Action" };
+
+            //await _context.Genres.AddAsync(genre1);
+            //await _context.Genres.AddAsync(genre2);
+            //await _context.Genres.AddAsync(genre3);
+            //await _context.Genres.AddAsync(genre4);
+            //await _context.Genres.AddAsync(genre5);
+
+            //await _context.SaveChangesAsync();
             return RedirectToAction("ListGames");
         }
 
         [HttpGet("Create")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             var game = new Game();
+            ViewBag.Genres = await _service.GetGenresAsync();
             return View(game);
         }
 

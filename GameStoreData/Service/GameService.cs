@@ -44,5 +44,11 @@ namespace GameStoreData.Service
             gameToUpdate.Image = game.Image;
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<Genre>> GetGenresAsync()
+        {
+            return await _context.Genres.ToListAsync();
+        }
+
     }
 }
