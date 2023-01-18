@@ -42,6 +42,13 @@ namespace GameStoreData.Service
             gameToUpdate.Name = game.Name;
             gameToUpdate.Price = game.Price;
             gameToUpdate.Image = game.Image;
+            //gameToUpdate.Genres = game.Genres;
+
+            foreach (var genre in game.Genres)
+            {
+                gameToUpdate.Genres.Add(genre);
+            }
+
             await _context.SaveChangesAsync();
         }
 
@@ -50,5 +57,10 @@ namespace GameStoreData.Service
             return await _context.Genres.ToListAsync();
         }
 
+
+        public async Task<List<Genre>> GetGenresAsSelectListAsync()
+        {
+            return await _context.Genres.ToListAsync();
+        }
     }
 }

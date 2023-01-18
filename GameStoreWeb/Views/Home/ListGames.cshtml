@@ -8,7 +8,7 @@
     <a class="newgame" asp-action="Create">New Game</a>
 </p>
 
-<div class="games">
+@*<div class="games">
     @foreach (var item in Model)
     {
         <img src="@item.Image" alt="image">
@@ -23,34 +23,26 @@
             <a id="inner" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
         </div>
     }
-</div>
+</div>*@
 
 
-@*<div class="gamesfddlihds;lgsdj;lfkds;ldkf;lsdfk;lsfd;lskdf;l">
-    @{ int gameIndex = 1; }
-        
+<div>
     @foreach (var item in Model)
     {
-        if (gameIndex >= 3 && gameIndex % 3 == 0)
-        {   
-            @:<div class="row">
-        }
+    <div style="float: left; position: relative; width: 33%; margin-bottom: 20px;">
         <img src="@item.Image" alt="image">
         <p class="details">
             @String.Join("/", item.Genres.Select(g => g.Name))
             <br>@(item.Name)
         </p>
         <p class="details">$@(item.Price)</p>
-
-        if (gameIndex >= 3 && gameIndex % 3 == 0)
-        {
-            @:</div>
-        }
-        gameIndex++;
         <div id="outer">
             <a id="inner" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
             <a id="inner" asp-action="Details" asp-route-id="@item.Id">Details</a> |
             <a id="inner" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
         </div>
-    }    
-</div>*@
+    </div>
+    }
+</div>
+
+<div class="row" style="clear: both"></div>

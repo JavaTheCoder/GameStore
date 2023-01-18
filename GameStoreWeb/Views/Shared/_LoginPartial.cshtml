@@ -8,7 +8,7 @@
 @if (SignInManager.IsSignedIn(User))
 {
     <li class="nav-item">
-            <img src="@UserManager.GetUserAsync(User).Result.ImageURL" class="avatar" 
+            <img src="@UserManager.GetUserAsync(User).Result.ImageURL" class="avatar"
             onerror="this.src='https://w0.peakpx.com/wallpaper/709/216/HD-wallpaper-pitch-black-dark.jpg'">
     </li>
     <li class="nav-item">

@@ -3,6 +3,8 @@ using GameStoreData.Identity.Data;
 using GameStoreData.Models;
 using GameStoreData.Service;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Security.Cryptography.Xml;
@@ -89,7 +91,20 @@ namespace GameStoreWeb.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var game = await _service.GetGameByIdAsync(id);
-            ViewBag.Genres = await _service.GetGenresAsync();
+            var genres = await _service.GetGenresAsync();
+
+            //var list = new List<SelectListItem>();
+            //foreach (var genre in genres)
+            //{
+            //    list.Add(new SelectListItem()
+            //    {
+            //        Text = genre.Name,
+            //        Value = genre.Name
+            //    });
+            //}
+
+            //game.SelectedGenres = list;
+            ViewBag.Genres = genres;
             return View(game);
         }
 
