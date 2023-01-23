@@ -1,29 +1,24 @@
-﻿using GameStoreData;
+﻿using GameStoreData.Identity.Data;
 using GameStoreData.Models;
 using GameStoreData.Service;
-using GameStoreWeb.Models;
+using GameStoreData.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
-using System.Security.Cryptography.Xml;
 
 namespace GameStoreWeb.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ApplicationDbContext _context;
         private readonly GameService _service;
 
-        public HomeController(ApplicationDbContext context, GameService service)
+        public HomeController(GameService service)
         {
-            _context = context;
             _service = service;
         }
 
+        //public async Task<IActionResult> Index()
         public IActionResult Index()
         {
-            //TODO: Add redirection
-
             //var genre1 = new Genre { Name = "RPG" };
             //var genre2 = new Genre { Name = "Adventure" };
             //var game1 = new Game { Name = "Horizon: Zero Dawn", Image = "horizon-zero-dawn", Price = 54.99 };
@@ -47,20 +42,39 @@ namespace GameStoreWeb.Controllers
             //await _context.Games.AddAsync(game2);
 
             //await _context.SaveChangesAsync();
+
+            //var genre1 = new Genre { Name = "Strategy" };
+            //var genre2 = new Genre { Name = "FPS" };
+            //var genre3 = new Genre { Name = "Arcade" };
+            //var genre4 = new Genre { Name = "Sports" };
+            //var genre5 = new Genre { Name = "Action" };
+
+            //await _context.Genres.AddAsync(genre1);
+            //await _context.Genres.AddAsync(genre2);
+            //await _context.Genres.AddAsync(genre3);
+            //await _context.Genres.AddAsync(genre4);
+            //await _context.Genres.AddAsync(genre5);
+
+            //await _context.SaveChangesAsync();
             return RedirectToAction("ListGames");
         }
 
         [HttpGet("Create")]
-        public IActionResult Create()
+        [Authorize(Roles = "Admin, Manager")]
+        public async Task<IActionResult> Create()
         {
             var game = new Game();
-            return View(game);
+            var gameVM = await _service.CreateGameVMAsync(game);
+
+            return View(gameVM);
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> Create(Game game)
+        public async Task<IActionResult> Create(GameVM gameVM)
         {
-            await _service.CreateGameAsync(game);
+            var game = await _service.CreateGameAsync(gameVM);
+            await _service.CreateNewGameAsync(game);
+
             return RedirectToAction("ListGames");
         }
 
@@ -72,15 +86,21 @@ namespace GameStoreWeb.Controllers
         }
 
         [HttpGet("Update/{id}")]
+        [Authorize(Roles = "Admin, Manager")]
         public async Task<IActionResult> Edit(int id)
         {
             var game = await _service.GetGameByIdAsync(id);
-            return View(game);
+            var gameVM = await _service.CreateGameVMAsync(game);
+
+            return View(gameVM);
         }
 
-        public async Task<IActionResult> Update(Game game)
+        [HttpPost]
+        public async Task<IActionResult> Update(GameVM gameVM)
         {
-            await _service.UpdateGameAsync(game);
+            var game = await _service.CreateGameAsync(gameVM);
+            await _service.UpdateGameAsync(game); //TODO: remove existing genres
+
             return RedirectToAction("ListGames");
         }
 
@@ -91,35 +111,16 @@ namespace GameStoreWeb.Controllers
             return View(game);
         }
 
+        [Authorize(Roles = "Admin, Manager")]
         public async Task<IActionResult> Delete(int id)
         {
             await _service.DeleteGameAsync(id);
             return RedirectToAction("ListGames");
         }
 
-
-        //public IActionResult ViewToDos(int id)
-        //{
-        //    ViewBag.iD = id;
-        //    return View(_context.ToDoItems.ToList().Where(i => i.ToDoListId == id));
-        //}
-
-        //public IActionResult Delete(int id)
-        //{
-        //    int listId = toDoService.GetToDo(id).ToDoListId;
-        //    toDoService.DeleteToDo(id);
-        //    return new RedirectResult($"~/ToDoItem/ViewTodos/{listId}");
-        //}
-
         public IActionResult Privacy()
         {
             return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

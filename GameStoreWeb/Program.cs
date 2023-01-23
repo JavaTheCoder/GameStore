@@ -1,8 +1,11 @@
 using GameStoreData;
-using GameStoreData.Service;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
+using GameStoreData.Identity.Data;
 using GameStoreData.Models;
+using GameStoreData.Service;
+using GameStoreWeb;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Build.Framework;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +15,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(o =>
 {
     o.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = true;
+    options.User.RequireUniqueEmail = true;
+})
+.AddRoles<IdentityRole>()
+.AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddScoped<GameService>();
 
@@ -29,12 +40,14 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseAuthentication(); ;
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapRazorPages();
+
+AppDbInitializer.SeedRolesToDb(app).Wait();
 
 app.Run();

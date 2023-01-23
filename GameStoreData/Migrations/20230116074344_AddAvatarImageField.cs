@@ -5,14 +5,14 @@
 namespace GameStoreData.Migrations
 {
     /// <inheritdoc />
-    public partial class AddImageToAGame : Migration
+    public partial class AddAvatarImageField : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "Image",
-                table: "Games",
+                name: "ImageURL",
+                table: "AspNetUsers",
                 type: "nvarchar(max)",
                 nullable: false,
                 defaultValue: "");
@@ -22,8 +22,8 @@ namespace GameStoreData.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Image",
-                table: "Games");
+                name: "ImageURL",
+                table: "AspNetUsers");
         }
     }
 }

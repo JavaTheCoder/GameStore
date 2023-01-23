@@ -19,5 +19,7 @@ namespace GameStoreData.Models
         public string Image { get; set; }
 
         public virtual ICollection<Genre> Genres { get; set; } = new List<Genre>();
+
+        //public IEnumerable<SelectListItem> SelectedGenres { get; set; } = new List<SelectListItem>();
     }
 }
