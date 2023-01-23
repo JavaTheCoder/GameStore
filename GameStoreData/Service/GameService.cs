@@ -1,5 +1,7 @@
 ﻿using GameStoreData.Identity.Data;
 using GameStoreData.Models;
+using GameStoreData.ViewModels;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameStoreData.Service
@@ -30,7 +32,26 @@ namespace GameStoreData.Service
             await _context.SaveChangesAsync();
         }
 
-        public async Task CreateGameAsync(Game game)
+        public async Task<Game> CreateGameAsync(GameVM gameVM)
+        {
+            var game = new Game
+            {
+                Id = gameVM.Id,
+                Name = gameVM.Name,
+                Genres = gameVM.Genres,
+                Image = gameVM.Image,
+                Price = gameVM.Price,
+            };
+
+            foreach (int id in gameVM.SelectedGenreIds)
+            {
+                game.Genres.Add(await GetGenreById(id));
+            }
+
+            return game;
+        }
+
+        public async Task CreateNewGameAsync(Game game)
         {
             _context.Games.Add(game);
             await _context.SaveChangesAsync();
@@ -42,11 +63,21 @@ namespace GameStoreData.Service
             gameToUpdate.Name = game.Name;
             gameToUpdate.Price = game.Price;
             gameToUpdate.Image = game.Image;
-            //gameToUpdate.Genres = game.Genres;
 
-            foreach (var genre in game.Genres)
+            foreach (var genre in gameToUpdate.Genres.ToList())
             {
-                gameToUpdate.Genres.Add(genre);
+                if (!game.Genres.Contains(genre))
+                {
+                    gameToUpdate.Genres.Remove(genre);
+                }
+            }
+
+            foreach (var genre in game.Genres.ToList())
+            {
+                if (!gameToUpdate.Genres.Contains(genre))
+                {
+                    gameToUpdate.Genres.Add(genre);
+                }
             }
 
             await _context.SaveChangesAsync();
@@ -61,6 +92,37 @@ namespace GameStoreData.Service
         public async Task<List<Genre>> GetGenresAsSelectListAsync()
         {
             return await _context.Genres.ToListAsync();
+        }
+
+        public async Task<Genre> GetGenreById(int id)
+        {
+            return await _context.Genres.FirstOrDefaultAsync(g => g.Id == id);
+        }
+
+        public async Task<GameVM> CreateGameVMAsync(Game game)
+        {
+            var gameVM = new GameVM
+            {
+                Id = game.Id,
+                Image = game.Image,
+                Name = game.Name,
+                Price = game.Price,
+                Genres = game.Genres
+            };
+
+            var list = new List<SelectListItem>();
+            foreach (var genre in await GetGenresAsync())
+            {
+                list.Add(new SelectListItem()
+                {
+                    Text = genre.Name,
+                    Value = genre.Id.ToString(),
+                });
+            }
+
+            gameVM.GenresList = list;
+            gameVM.SelectedGenreIds = game.Genres.Select(g => g.Id).ToList();
+            return gameVM;
         }
     }
 }

@@ -1,24 +1,18 @@
-﻿using GameStoreData;
-using GameStoreData.Identity.Data;
+﻿using GameStoreData.Identity.Data;
 using GameStoreData.Models;
 using GameStoreData.Service;
+using GameStoreData.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.CodeAnalysis;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
-using System.Security.Cryptography.Xml;
 
 namespace GameStoreWeb.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ApplicationDbContext _context;
         private readonly GameService _service;
 
-        public HomeController(ApplicationDbContext context, GameService service)
+        public HomeController(GameService service)
         {
-            _context = context;
             _service = service;
         }
 
@@ -66,17 +60,21 @@ namespace GameStoreWeb.Controllers
         }
 
         [HttpGet("Create")]
+        [Authorize(Roles = "Admin, Manager")]
         public async Task<IActionResult> Create()
         {
             var game = new Game();
-            ViewBag.Genres = await _service.GetGenresAsync();
-            return View(game);
+            var gameVM = await _service.CreateGameVMAsync(game);
+
+            return View(gameVM);
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> Create(Game game)
+        public async Task<IActionResult> Create(GameVM gameVM)
         {
-            await _service.CreateGameAsync(game);
+            var game = await _service.CreateGameAsync(gameVM);
+            await _service.CreateNewGameAsync(game);
+
             return RedirectToAction("ListGames");
         }
 
@@ -88,29 +86,21 @@ namespace GameStoreWeb.Controllers
         }
 
         [HttpGet("Update/{id}")]
+        [Authorize(Roles = "Admin, Manager")]
         public async Task<IActionResult> Edit(int id)
         {
             var game = await _service.GetGameByIdAsync(id);
-            var genres = await _service.GetGenresAsync();
+            var gameVM = await _service.CreateGameVMAsync(game);
 
-            //var list = new List<SelectListItem>();
-            //foreach (var genre in genres)
-            //{
-            //    list.Add(new SelectListItem()
-            //    {
-            //        Text = genre.Name,
-            //        Value = genre.Name
-            //    });
-            //}
-
-            //game.SelectedGenres = list;
-            ViewBag.Genres = genres;
-            return View(game);
+            return View(gameVM);
         }
 
-        public async Task<IActionResult> Update(Game game)
+        [HttpPost]
+        public async Task<IActionResult> Update(GameVM gameVM)
         {
-            await _service.UpdateGameAsync(game);
+            var game = await _service.CreateGameAsync(gameVM);
+            await _service.UpdateGameAsync(game); //TODO: remove existing genres
+
             return RedirectToAction("ListGames");
         }
 
@@ -121,6 +111,7 @@ namespace GameStoreWeb.Controllers
             return View(game);
         }
 
+        [Authorize(Roles = "Admin, Manager")]
         public async Task<IActionResult> Delete(int id)
         {
             await _service.DeleteGameAsync(id);

@@ -1,46 +1,44 @@
-﻿@model IEnumerable<GameStoreData.Models.Game>
+﻿@using GameStoreData.Identity.Data;
+@using Microsoft.AspNetCore.Identity;
+
+@model IEnumerable<GameStoreData.Models.Game>
+
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
 
 @{
+    bool hide = true;
     ViewData["Title"] = "ListGames";
 }
 
-<p>
-    <a class="newgame" asp-action="Create">New Game</a>
-</p>
-
-@*<div class="games">
-    @foreach (var item in Model)
+<div style="text-align: center; margin-bottom: 20px;">
+    @*TODO: MAKE THIS A DROPDOWN <a class="newgame" asp-action="Filter">Filter</a>*@
+    @if (SignInManager.IsSignedIn(User) && 
+        !UserManager.GetRolesAsync(UserManager
+        .GetUserAsync(User).Result).Result.Contains("User"))
     {
-        <img src="@item.Image" alt="image">
-        <p class="details">
-            @String.Join("/", item.Genres.Select(g => g.Name))
-            <br>@(item.Name)
-        </p>
-        <p class="details">$@(item.Price)</p>
-        <div id="outer">
-            <a id="inner" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-            <a id="inner" asp-action="Details" asp-route-id="@item.Id">Details</a> |
-            <a id="inner" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-        </div>
+        hide = false;
+        <a class="newgame" asp-action="Create">New Game</a>
     }
-</div>*@
-
+</div>
 
 <div>
     @foreach (var item in Model)
     {
-    <div style="float: left; position: relative; width: 33%; margin-bottom: 20px;">
-        <img src="@item.Image" alt="image">
+    <div class="games-list">
+        <img src="@item.Image" alt="image" onclick="imgClick(@item.Id)">
         <p class="details">
-            @String.Join("/", item.Genres.Select(g => g.Name))
+            @{ string s = String.Join("/", item.Genres.Select(g => g.Name)); }
+            @(string.IsNullOrEmpty(s) ? "No Genre" : s)
             <br>@(item.Name)
         </p>
-        <p class="details">$@(item.Price)</p>
-        <div id="outer">
-            <a id="inner" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-            <a id="inner" asp-action="Details" asp-route-id="@item.Id">Details</a> |
-            <a id="inner" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-        </div>
+        <p class="details" style="font-weight:bold">$@(item.Price)</p>
+        @if (!hide) {
+            <div style="margin-top:15px; text-align:center;">
+                <a class="newgame" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                <a class="newgame" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </div>
+        }
     </div>
     }
 </div>

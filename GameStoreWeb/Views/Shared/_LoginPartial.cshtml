@@ -5,8 +5,9 @@
 @inject UserManager<ApplicationUser> UserManager
 
 <ul class="navbar-nav">
-@if (SignInManager.IsSignedIn(User))
-{
+
+@if (SignInManager.IsSignedIn(User)) 
+{ // ADD PAGE FOR ADMIN TO GRANT ELEVATED PERMISSIONS TO USERS
     <li class="nav-item">
             <img src="@UserManager.GetUserAsync(User).Result.ImageURL" class="avatar"
             onerror="this.src='https://w0.peakpx.com/wallpaper/709/216/HD-wallpaper-pitch-black-dark.jpg'">
@@ -14,7 +15,8 @@
     <li class="nav-item">
             <a id="manage" class="nav-link text-dark" asp-area="Identity" 
             asp-page="/Account/Manage/Index" title="Manage">
-            @UserManager.GetUserAsync(User).Result.FirstName @UserManager.GetUserAsync(User).Result.LastName</a>
+            @UserManager.GetUserAsync(User).Result.FirstName @UserManager.GetUserAsync(User).Result.LastName
+            </a>
     </li>
     <li class="nav-item">
         <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">

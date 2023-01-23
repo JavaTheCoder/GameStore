@@ -1,7 +1,6 @@
-﻿@model GameStoreData.Models.Game
+﻿@model GameStoreData.ViewModels.GameVM
 
 @{
-    // TODO: Add Genre to Create
     ViewData["Title"] = "Create";
 }
 
@@ -31,14 +30,12 @@
             <div class="form-group">
                 @Html.LabelFor(model => model.Genres)
                 <div class="col-sm-6">
-                    @Html.ListBoxFor(model => model.Genres, new MultiSelectList(ViewBag.Genres, "Id", "Name"))
+                    @Html.ListBoxFor(model => model.SelectedGenreIds, Model.GenresList)
                 </div>
             </div>
 
             <div class="form-group">
                 <input type="submit" value="Create" class="newgame" />
-                @*TODO: ASSIGN SELECTED GENRES TO THE GAME*@
-                @*<button class="newgame">@Html.ActionLink("Create New", "Create", "Home", null, null)</button>*@
                 <a asp-action="Index" class="newgame">Cancel</a>
             </div>
         </form>
@@ -48,9 +45,4 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    <script>
-        $(document).ready(function() {
-            $('#genres_dropdown').multiselect();
-        });
-    </script>
 }
