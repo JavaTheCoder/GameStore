@@ -4,6 +4,7 @@ using GameStoreData.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GameStoreData.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230126064119_AddCart")]
+    partial class AddCart
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -162,9 +165,12 @@ namespace GameStoreData.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GameId");
 
                     b.HasIndex("ParentCommentId");
 
@@ -379,13 +385,21 @@ namespace GameStoreData.Migrations
 
             modelBuilder.Entity("GameStoreData.Models.Comment", b =>
                 {
+                    b.HasOne("GameStoreData.Models.Game", null)
+                        .WithMany("Comments")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("GameStoreData.Models.Comment", "ParentComment")
                         .WithMany("ChildComments")
                         .HasForeignKey("ParentCommentId");
 
                     b.HasOne("GameStoreData.Identity.Data.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("ParentComment");
 
@@ -446,6 +460,11 @@ namespace GameStoreData.Migrations
             modelBuilder.Entity("GameStoreData.Models.Comment", b =>
                 {
                     b.Navigation("ChildComments");
+                });
+
+            modelBuilder.Entity("GameStoreData.Models.Game", b =>
+                {
+                    b.Navigation("Comments");
                 });
 #pragma warning restore 612, 618
         }

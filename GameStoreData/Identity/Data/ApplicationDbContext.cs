@@ -9,6 +9,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public DbSet<Game> Games { get; set; }
     public DbSet<Genre> Genres { get; set; }
+    public DbSet<Comment> Comments { get; set; }
+    public DbSet<CartItem> UsersCartItems { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)

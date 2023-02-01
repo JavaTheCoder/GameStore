@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using GameStoreData.Models;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace GameStoreData.Identity.Data;
@@ -9,4 +10,3 @@ public class ApplicationUser : IdentityUser
     public string LastName { get; set; }
     public string ImageURL { get; set; }
 }
-

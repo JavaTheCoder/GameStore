@@ -139,7 +139,6 @@ namespace GameStoreWeb.Areas.Identity.Pages.Account
                 await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
-                // TODO: MAKE EMAIL UNIQUE
                 user.FirstName = Input.FirstName;
                 user.LastName = Input.LastName;
                 user.ImageURL = Input.ImageURL;

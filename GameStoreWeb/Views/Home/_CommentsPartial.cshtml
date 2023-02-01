@@ -1,0 +1,73 @@
+﻿@using GameStoreData.Identity.Data;
+@using Microsoft.AspNetCore.Identity;
+
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+
+@model GameStoreData.ViewModels.CommentVM
+
+<hr />
+<div>
+    <dl class="row">
+    @foreach (var comment in Model.GameComments)
+    {
+        <dd class="col-sm-10 comment">
+            @if (comment.ParentCommentId == null)
+            {
+                <p class="user_comment">
+                    @(comment.UserId != null ? UserManager.FindByIdAsync(@comment.UserId).Result.UserName : "Guest") 
+                    @comment.TimeLeft
+                </p>
+                <h5>@comment.Body</h5>
+
+                <div style="margin-bottom: 15px">
+                    <a asp-action="ReplyToComment" asp-route-id="@comment.Id">Reply</a> |
+                    <a asp-action="UpdateComment" asp-route-id="@comment.Id">Edit</a> |
+                    <a asp-action="DeleteComment" asp-route-id="@comment.Id">Delete</a>
+                </div>
+            }
+
+            @if (comment.ChildComments != null && comment.ChildComments.Count != 0)
+            {
+                foreach(var child in comment.ChildComments)
+                {
+                    <div style="margin-left: 50px">
+                        <p class="user_comment">
+                            @(child.UserId != null ? UserManager.FindByIdAsync(@child.UserId).Result.UserName : "Guest") 
+                            @child.TimeLeft
+                        </p>
+                        <h5>@child.Body</h5>
+                 
+                        <div style="margin-bottom: 15px">
+                            <a asp-action="ReplyToComment" asp-route-id="@child.Id">Reply</a> |
+                            <a asp-action="UpdateComment" asp-route-id="@child.Id">Edit</a> |
+                            <a asp-action="DeleteComment" asp-route-id="@child.Id">Delete</a>
+                        </div>
+                    </div>
+                }
+            }
+        </dd>
+    }
+    </dl>
+</div>
+
+@*<button class="newgame" id="commentbutton" onclick="displayCommentBox()">Comment</button>*@
+<div class="row" @*id="commentfield"*@>
+    <div class="col-md-4">
+        <form asp-action="AddComment" asp-route-model="@Model">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                Comment
+                <input asp-for="Body" class="form-control" id="textfield" />
+                <span asp-validation-for="Body" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Add" class="newgame" />
+            </div>
+            <input type="hidden" asp-for="@Model.CommentVMId" />
+            <input type="hidden" asp-for="@Model.GameId" />
+            <input type="hidden" asp-for="@Model.ParentCommentId" />
+        </form>
+        @*<button class="newgame" onclick="displayCommentBox()">Cancel</button>*@
+    </div>
+</div>

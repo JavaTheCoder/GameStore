@@ -3,6 +3,7 @@ using GameStoreData.Models;
 using GameStoreData.Service;
 using GameStoreData.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameStoreWeb.Controllers
@@ -10,52 +11,16 @@ namespace GameStoreWeb.Controllers
     public class HomeController : Controller
     {
         private readonly GameService _service;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public HomeController(GameService service)
+        public HomeController(GameService service, UserManager<ApplicationUser> userManager)
         {
             _service = service;
+            _userManager = userManager;
         }
 
-        //public async Task<IActionResult> Index()
         public IActionResult Index()
         {
-            //var genre1 = new Genre { Name = "RPG" };
-            //var genre2 = new Genre { Name = "Adventure" };
-            //var game1 = new Game { Name = "Horizon: Zero Dawn", Image = "horizon-zero-dawn", Price = 54.99 };
-            //var game2 = new Game { Name = "Horizon: Forbidden West", Image = "horizon-forbidden-west", Price = 59.99 };
-
-            //genre1.Games.Add(game1);
-            //genre1.Games.Add(game2);
-
-            //genre2.Games.Add(game1);
-            //genre2.Games.Add(game2);
-
-            //game1.Genres.Add(genre1);
-            //game2.Genres.Add(genre1);
-
-            //game1.Genres.Add(genre2);
-            //game2.Genres.Add(genre2);
-
-            //await _context.Genres.AddAsync(genre1);
-            //await _context.Genres.AddAsync(genre2);
-            //await _context.Games.AddAsync(game1);
-            //await _context.Games.AddAsync(game2);
-
-            //await _context.SaveChangesAsync();
-
-            //var genre1 = new Genre { Name = "Strategy" };
-            //var genre2 = new Genre { Name = "FPS" };
-            //var genre3 = new Genre { Name = "Arcade" };
-            //var genre4 = new Genre { Name = "Sports" };
-            //var genre5 = new Genre { Name = "Action" };
-
-            //await _context.Genres.AddAsync(genre1);
-            //await _context.Genres.AddAsync(genre2);
-            //await _context.Genres.AddAsync(genre3);
-            //await _context.Genres.AddAsync(genre4);
-            //await _context.Genres.AddAsync(genre5);
-
-            //await _context.SaveChangesAsync();
             return RedirectToAction("ListGames");
         }
 
@@ -99,16 +64,9 @@ namespace GameStoreWeb.Controllers
         public async Task<IActionResult> Update(GameVM gameVM)
         {
             var game = await _service.CreateGameAsync(gameVM);
-            await _service.UpdateGameAsync(game); //TODO: remove existing genres
+            await _service.UpdateGameAsync(game);
 
             return RedirectToAction("ListGames");
-        }
-
-        [HttpGet("Game/{id}")]
-        public async Task<IActionResult> Details(int id)
-        {
-            var game = await _service.GetGameByIdAsync(id);
-            return View(game);
         }
 
         [Authorize(Roles = "Admin, Manager")]
@@ -116,6 +74,189 @@ namespace GameStoreWeb.Controllers
         {
             await _service.DeleteGameAsync(id);
             return RedirectToAction("ListGames");
+        }
+
+        [HttpGet("Game/{id}")]
+        public async Task<IActionResult> Details(int id)
+        {
+            var game = await _service.GetGameByIdAsync(id);
+
+            if (game.CommentVM == null)
+            {
+                game.CommentVM = new CommentVM();
+                game.CommentVM.GameId = game.Id;
+            }
+
+            foreach (var comment in await _service.LoadGameCommentsById(game.Id))
+            {
+                game.CommentVM.GameComments.Add(comment);
+                if (comment.Body == game.CommentVM.Body)
+                {
+                    game.CommentVM.CommentVMId = comment.Id;
+                }
+            }
+
+            return View(game);
+        }
+
+        // -------------------------Handling Comments (Epic 3)-------------------------
+        public async Task<IActionResult> ReplyToComment(int id)
+        {
+            var comment = await _service.GetCommentByIdAsync(id);
+            var game = await _service.GetGameByIdAsync(comment.GameId);
+
+            game.CommentVM = new CommentVM
+            {
+                GameId = game.Id,
+                ParentCommentId = id
+            };
+
+            return View("Details", game);
+        }
+
+        public async Task<IActionResult> AddComment(CommentVM commentVM)
+        {
+            if (commentVM.CommentVMId != 0)
+            {
+                await _service.UpdateCommentAsync(commentVM);
+            }
+            else
+            {
+                await _service.AddCommentAsync(commentVM, _userManager.GetUserId(User));
+            }
+            return RedirectToAction("Details", new { id = commentVM.GameId });
+
+            //var game = await _service.GetGameByIdAsync(commentVM.GameId);
+            //game.CommentVM = new CommentVM
+            //{
+            //    GameId = game.Id,
+            //    ParentCommentId = commentVM.ParentCommentId
+            //};
+            //return View("Details", game);
+        }
+
+        public async Task<IActionResult> DeleteComment(int id)
+        {
+            var comment = await _service.GetCommentByIdAsync(id);
+
+            if (_userManager.GetUserId(User) == comment.UserId
+                || _userManager.GetRolesAsync(_userManager.GetUserAsync(User).Result)
+                                            .Result.Contains("Manager")
+                || _userManager.GetRolesAsync(_userManager.GetUserAsync(User).Result)
+                                            .Result.Contains("Admin"))
+            {
+                await _service.DeleteCommentAsync(comment);
+                return RedirectToAction("Details", new { id = comment.GameId });
+            }
+
+            throw new Exception("Only Admin/Managers/Users who created their comments can delete them");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UpdateComment(int id)
+        {
+            var comment = await _service.GetCommentByIdAsync(id);
+            var commentVM = new CommentVM
+            {
+                CommentVMId = comment.Id,
+                Body = comment.Body
+            };
+
+            var game = await _service.GetGameByIdAsync(comment.GameId);
+            game.CommentVM = commentVM;
+            game.CommentVM.GameId = game.Id;
+
+            return View("Details", game);
+        }
+
+        // -------------------------Handling Carts (Epic 4)-------------------------
+        [HttpGet]
+        public async Task<IActionResult> AddToCart(int id)
+        {
+            string username = _userManager.GetUserAsync(User).Result.UserName;
+            var game = await _service.GetGameByIdAsync(id);
+
+            var cart = _service.GetAllCartItemsByUsername(username)
+                .FirstOrDefault(c => c?.GameInCart?.Name == game.Name);
+            if (cart != null)
+            {
+                cart.Quantity += 1;
+                await _service.UpdateCartAsync(cart);
+                return RedirectToAction("ListGames");
+            }
+
+            await _service.SaveCartAsync(
+                new CartItem
+                {
+                    Quantity = 1,
+                    GameInCart = game,
+                    Username = username
+                }
+            );
+            return RedirectToAction("ListGames");
+        }
+
+        [HttpGet]
+        public ActionResult<IEnumerable<CartItem>> GetAllCartItems()
+        {
+            string username = _userManager.GetUserAsync(User).Result.UserName;
+            var cartItems = _service.GetAllCartItemsByUsername(username);
+            return View("Cart", cartItems);
+        }
+
+        public async Task<IActionResult> IncreaseGameCount(int id)
+        {
+            string username = _userManager.GetUserAsync(User).Result.UserName;
+            var cart = _service.GetAllCartItemsByUsername(username)
+                .FirstOrDefault(c => c.Id == id);
+            cart.Quantity += 1;
+
+            await _service.UpdateCartAsync(cart);
+            return RedirectToAction("GetAllCartItems");
+        }
+
+        public async Task<IActionResult> DecreaseGameCount(int id)
+        {
+            string username = _userManager.GetUserAsync(User).Result.UserName;
+            var cart = _service.GetAllCartItemsByUsername(username)
+                .FirstOrDefault(c => c.Id == id);
+
+            if (cart.Quantity > 1)
+            {
+                cart.Quantity -= 1;
+                await _service.UpdateCartAsync(cart);
+            }
+            else
+            {
+                await _service.RemoveCartItemFromUserAsync(cart);
+            }
+
+            return RedirectToAction("GetAllCartItems");
+        }
+
+        public async Task<IActionResult> RemoveGameFromCart(int id)
+        {
+            string username = _userManager.GetUserAsync(User).Result.UserName;
+            var cart = _service.GetAllCartItemsByUsername(username)
+                .FirstOrDefault(c => c.Id == id);
+
+            await _service.RemoveCartItemFromUserAsync(cart);
+            return RedirectToAction("GetAllCartItems");
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<CustomerVM>> BuyGames(int id)
+        {
+            var customer = new CustomerVM();
+            return View("BuyGames", customer);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> OrderGames(/*CustomerVM customerVM*/)
+        {
+            string username = _userManager.GetUserAsync(User).Result.UserName;
+            await _service.ClearAllCartItemsAsync(username);
+            return RedirectToAction("GetAllCartItems");
         }
 
         public IActionResult Privacy()

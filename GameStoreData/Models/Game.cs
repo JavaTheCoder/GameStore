@@ -1,10 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GameStoreData.ViewModels;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GameStoreData.Models
 {
-    /// <summary>
-    /// Game ViewModel
-    /// </summary>
     public class Game
     {
         public int Id { get; set; }
@@ -20,6 +19,7 @@ namespace GameStoreData.Models
 
         public virtual ICollection<Genre> Genres { get; set; } = new List<Genre>();
 
-        //public IEnumerable<SelectListItem> SelectedGenres { get; set; } = new List<SelectListItem>();
+        [NotMapped]
+        public CommentVM CommentVM { get; set; }
     }
 }

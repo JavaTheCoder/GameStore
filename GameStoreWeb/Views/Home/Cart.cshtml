@@ -1,0 +1,47 @@
+﻿@model IEnumerable<GameStoreData.Models.CartItem>
+
+@{
+    ViewData["Title"] = "Cart";
+    string CalculateTotal()
+    {
+        double price = 0;
+        foreach(var item in Model)
+        {
+            price += item.Quantity * item.GameInCart.Price;
+        }
+
+        return String.Format("{0:0.00}", price);
+    }
+}
+
+<div style="text-align: center; margin-bottom: 20px;">
+    <a asp-action="BuyGames" class="newgame">Proceed</a>
+    <p style ="font-weight:bold">Total: $@CalculateTotal()</p>
+</div>
+
+<div>
+    @foreach (var item in Model)
+    {
+        <div class="games-list">
+            <img src="@item.GameInCart.Image" alt="image" onclick="imgClick(@item.Id)">
+            <p class="details">
+                @item.GameInCart.Name
+            </p>
+            <p class="details" style="font-weight:bold">
+                $@item.GameInCart.Price x @item.Quantity <br/>
+                Total: $@(String.Format("{0:0.00}", item.GameInCart.Price * item.Quantity))
+            </p>
+            <div style="margin-top:15px; text-align:center;">
+                <a class="newgame" asp-action="IncreaseGameCount" asp-route-id="@item.Id">+</a>
+                <a class="newgame" asp-action="RemoveGameFromCart" asp-route-id="@item.Id">×</a>
+                <a class="newgame" asp-action="DecreaseGameCount" asp-route-id="@item.Id">-</a>
+            </div>
+        </div>
+    }
+</div>
+
+<div style="text-align:center; margin-top:20px">
+    <a asp-action="Index" class="newgame">Go Back</a>
+</div>
+
+<div class="row" style="clear: both"></div>

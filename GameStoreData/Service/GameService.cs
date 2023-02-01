@@ -1,8 +1,10 @@
 ﻿using GameStoreData.Identity.Data;
 using GameStoreData.Models;
 using GameStoreData.ViewModels;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
 namespace GameStoreData.Service
 {
@@ -41,6 +43,7 @@ namespace GameStoreData.Service
                 Genres = gameVM.Genres,
                 Image = gameVM.Image,
                 Price = gameVM.Price,
+                CommentVM = new CommentVM()
             };
 
             foreach (int id in gameVM.SelectedGenreIds)
@@ -88,7 +91,6 @@ namespace GameStoreData.Service
             return await _context.Genres.ToListAsync();
         }
 
-
         public async Task<List<Genre>> GetGenresAsSelectListAsync()
         {
             return await _context.Genres.ToListAsync();
@@ -123,6 +125,87 @@ namespace GameStoreData.Service
             gameVM.GenresList = list;
             gameVM.SelectedGenreIds = game.Genres.Select(g => g.Id).ToList();
             return gameVM;
+        }
+
+        public async Task SaveCartAsync(CartItem cartItem)
+        {
+            _context.Add(cartItem);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateCartAsync(CartItem cartItem)
+        {
+            var oldCart = GetCartByIdAndUsername(cartItem.Username, cartItem.Id);
+            oldCart.Quantity = cartItem.Quantity;
+            await _context.SaveChangesAsync();
+        }
+
+        public CartItem GetCartByIdAndUsername(string userName, int id)
+        {
+            return _context.UsersCartItems.Include(c => c.GameInCart)
+                .Where(c => c.Username == userName).FirstOrDefault(c => c.Id == id);
+        }
+
+        public IEnumerable<CartItem> GetAllCartItemsByUsername(string userName)
+        {
+            return _context.UsersCartItems.Include(c => c.GameInCart).Where(c => c.Username == userName);
+        }
+
+        public async Task RemoveCartItemFromUserAsync(CartItem cart)
+        {
+            _context.UsersCartItems.Remove(cart);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task ClearAllCartItemsAsync(string userName)
+        {
+            // TODO: Clear CartItems when user purchased
+            var cart = _context.UsersCartItems.Where(c => c.Username != userName);
+            cart.ToList().RemoveRange(0, cart.Count());
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddCommentAsync(CommentVM commentVM, string userId)
+        {
+            var comment = new Comment
+            {
+                Body = commentVM.Body,
+                GameId = commentVM.GameId,
+                TimeLeft = DateTime.Now,
+                UserId = userId,
+                ParentCommentId = commentVM.ParentCommentId
+            };
+
+            _context.Comments.Add(comment);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateCommentAsync(CommentVM commentVM)
+        {
+            var comment = _context.Comments.FirstOrDefault(c => c.Id == commentVM.CommentVMId);
+            comment.Body = commentVM.Body;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<Comment>> LoadGameCommentsById(int id)
+        {
+            return await _context.Comments.Where(c => c.GameId == id).ToListAsync();
+        }
+
+        public async Task DeleteCommentAsync(Comment comment)
+        {
+            if (comment.ChildComments != null)
+            {
+                _context.Comments.RemoveRange(comment.ChildComments);
+            }
+
+            _context.Comments.Remove(comment);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Comment> GetCommentByIdAsync(int id)
+        {
+            return await _context.Comments.Include(c => c.ChildComments).FirstOrDefaultAsync(c => c.Id == id);
         }
     }
 }

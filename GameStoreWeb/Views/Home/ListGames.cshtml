@@ -11,10 +11,19 @@
     ViewData["Title"] = "ListGames";
 }
 
+<a class="newgame" asp-action="Filter" onclick="handleFilterBtn()">Filter Games</a>
+
+<div class="form-group" id="filtergames">
+    <div class="col-sm-6">
+        @*@Html.ListBoxFor(model => model.SelectedGenreIds, Model.GenresList)*@
+        @*@Html.ListBoxFor(model => )*@
+        AMOGUS
+    </div>
+</div>
+
 <div style="text-align: center; margin-bottom: 20px;">
     @*TODO: MAKE THIS A DROPDOWN <a class="newgame" asp-action="Filter">Filter</a>*@
-    @if (SignInManager.IsSignedIn(User) && 
-        !UserManager.GetRolesAsync(UserManager
+    @if (SignInManager.IsSignedIn(User) && !UserManager.GetRolesAsync(UserManager
         .GetUserAsync(User).Result).Result.Contains("User"))
     {
         hide = false;
@@ -33,12 +42,17 @@
             <br>@(item.Name)
         </p>
         <p class="details" style="font-weight:bold">$@(item.Price)</p>
-        @if (!hide) {
-            <div style="margin-top:15px; text-align:center;">
-                <a class="newgame" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                <a class="newgame" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </div>
-        }
+        <div style="margin-top:15px; text-align:center;">
+            @if(SignInManager.IsSignedIn(User))
+            {
+                <a class="buygame" asp-action="AddToCart" asp-route-id="@item.Id">Buy</a>
+                @if (!hide)
+                {
+                    <a class="newgame" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                    <a class="newgame" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                }
+            }
+        </div>
     </div>
     }
 </div>
