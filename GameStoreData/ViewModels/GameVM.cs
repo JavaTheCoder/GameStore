@@ -18,5 +18,7 @@ namespace GameStoreData.ViewModels
         public IEnumerable<SelectListItem> GenresList { get; set; } = new List<SelectListItem>();
 
         public ICollection<int> SelectedGenreIds { get; set; }
+
+        public ICollection<Game> Games { get; set; }
     }
 }

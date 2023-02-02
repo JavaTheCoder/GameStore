@@ -13,6 +13,11 @@ html {
     margin-bottom: 5px;
 }
 
+#filtergames,
+#filterbyname {
+    margin-top: 10px;
+}
+
 .comment {
     border: 1px solid;
     margin-bottom: 0px;

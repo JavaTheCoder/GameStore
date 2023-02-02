@@ -8,12 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GameStoreWeb.Controllers
 {
-    public class HomeController : Controller
+    public class GameController : Controller
     {
         private readonly GameService _service;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public HomeController(GameService service, UserManager<ApplicationUser> userManager)
+        public GameController(GameService service, UserManager<ApplicationUser> userManager)
         {
             _service = service;
             _userManager = userManager;
@@ -47,7 +47,65 @@ namespace GameStoreWeb.Controllers
         public async Task<IActionResult> ListGames()
         {
             var games = await _service.GetGamesAsync();
-            return View(games);
+            var gameVM = new GameVM
+            {
+                Games = games
+            };
+
+            var genres = await _service.GetGenresAsync();
+            _service.InitializeGenresList(gameVM, genres);
+
+            gameVM.SelectedGenreIds = genres.Select(g => g.Id).ToList();
+
+            return View(gameVM);
+        }
+
+        // ------------------------- Filtering (Epic 1) -------------------------
+        public async Task<IActionResult> FilterGames(GameVM gameVM)
+        {
+            foreach (int id in gameVM.SelectedGenreIds)
+            {
+                gameVM.Genres.Add(await _service.GetGenreById(id));
+            }
+
+            var gameList = new List<Game>();
+            foreach (var genreList in gameVM.Genres)
+            {
+                foreach (var game in genreList.Games)
+                {
+                    if (!gameList.Contains(game))
+                    {
+                        gameList.Add(game);
+                    }
+                }
+            }
+
+            if (gameVM.Name == null)
+            {
+                gameVM.Games = gameList;
+            }
+            else
+            {
+                gameVM.Games = new List<Game>();
+                foreach (var game in gameList)
+                {
+                    if (game.Name.Contains(gameVM.Name,
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        gameVM.Games.Add(game);
+                    }
+                }
+            }
+
+            var genres = await _service.GetGenresAsync();
+            _service.InitializeGenresList(gameVM, genres);
+
+            return View("ListGames", gameVM);
+        }
+
+        public async Task<IActionResult> FilterGamesByName(GameVM gameVM)
+        {
+            return RedirectToAction("ListGames");
         }
 
         [HttpGet("Update/{id}")]
@@ -125,14 +183,6 @@ namespace GameStoreWeb.Controllers
                 await _service.AddCommentAsync(commentVM, _userManager.GetUserId(User));
             }
             return RedirectToAction("Details", new { id = commentVM.GameId });
-
-            //var game = await _service.GetGameByIdAsync(commentVM.GameId);
-            //game.CommentVM = new CommentVM
-            //{
-            //    GameId = game.Id,
-            //    ParentCommentId = commentVM.ParentCommentId
-            //};
-            //return View("Details", game);
         }
 
         public async Task<IActionResult> DeleteComment(int id)
@@ -199,6 +249,11 @@ namespace GameStoreWeb.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<CartItem>> GetAllCartItems()
         {
+            if (_userManager.GetUserAsync(User).Result == null)
+            {
+                return RedirectToAction("BuyGames");
+            }
+
             string username = _userManager.GetUserAsync(User).Result.UserName;
             var cartItems = _service.GetAllCartItemsByUsername(username);
             return View("Cart", cartItems);
@@ -245,7 +300,7 @@ namespace GameStoreWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<CustomerVM>> BuyGames(int id)
+        public async Task<ActionResult<CustomerVM>> BuyGames()
         {
             var customer = new CustomerVM();
             return View("BuyGames", customer);
@@ -254,6 +309,11 @@ namespace GameStoreWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> OrderGames(/*CustomerVM customerVM*/)
         {
+            if (_userManager.GetUserAsync(User).Result == null)
+            {
+                return RedirectToAction("ListGames");
+            }
+
             string username = _userManager.GetUserAsync(User).Result.UserName;
             await _service.ClearAllCartItemsAsync(username);
             return RedirectToAction("GetAllCartItems");

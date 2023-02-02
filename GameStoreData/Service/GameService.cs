@@ -1,10 +1,8 @@
 ﻿using GameStoreData.Identity.Data;
 using GameStoreData.Models;
 using GameStoreData.ViewModels;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics.CodeAnalysis;
 
 namespace GameStoreData.Service
 {
@@ -30,7 +28,9 @@ namespace GameStoreData.Service
         public async Task DeleteGameAsync(int id)
         {
             var game = await GetGameByIdAsync(id);
+            var gameComments = _context.Comments.Where(c => c.GameId == game.Id);
             _context.Games.Remove(game);
+            _context.Comments.RemoveRange(gameComments);
             await _context.SaveChangesAsync();
         }
 
@@ -160,9 +160,12 @@ namespace GameStoreData.Service
         public async Task ClearAllCartItemsAsync(string userName)
         {
             // TODO: Clear CartItems when user purchased
-            var cart = _context.UsersCartItems.Where(c => c.Username != userName);
-            cart.ToList().RemoveRange(0, cart.Count());
-            await _context.SaveChangesAsync();
+            var cart = _context.UsersCartItems.Where(c => c.Username == userName);
+            if (cart != null)
+            {
+                cart.ToList().RemoveRange(0, cart.Count());
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task AddCommentAsync(CommentVM commentVM, string userId)
@@ -206,6 +209,22 @@ namespace GameStoreData.Service
         public async Task<Comment> GetCommentByIdAsync(int id)
         {
             return await _context.Comments.Include(c => c.ChildComments).FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<GameVM> InitializeGenresList(GameVM gameVM, List<Genre> genres)
+        {
+            var list = new List<SelectListItem>();
+            foreach (var genre in genres)
+            {
+                list.Add(new SelectListItem()
+                {
+                    Text = genre.Name,
+                    Value = genre.Id.ToString(),
+                });
+            }
+
+            gameVM.GenresList = list;
+            return gameVM;
         }
     }
 }
