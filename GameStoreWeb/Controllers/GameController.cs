@@ -60,54 +60,6 @@ namespace GameStoreWeb.Controllers
             return View(gameVM);
         }
 
-        // ------------------------- Filtering (Epic 1) -------------------------
-        public async Task<IActionResult> FilterGames(GameVM gameVM)
-        {
-            foreach (int id in gameVM.SelectedGenreIds)
-            {
-                gameVM.Genres.Add(await _service.GetGenreById(id));
-            }
-
-            var gameList = new List<Game>();
-            foreach (var genreList in gameVM.Genres)
-            {
-                foreach (var game in genreList.Games)
-                {
-                    if (!gameList.Contains(game))
-                    {
-                        gameList.Add(game);
-                    }
-                }
-            }
-
-            if (gameVM.Name == null)
-            {
-                gameVM.Games = gameList;
-            }
-            else
-            {
-                gameVM.Games = new List<Game>();
-                foreach (var game in gameList)
-                {
-                    if (game.Name.Contains(gameVM.Name,
-                        StringComparison.OrdinalIgnoreCase))
-                    {
-                        gameVM.Games.Add(game);
-                    }
-                }
-            }
-
-            var genres = await _service.GetGenresAsync();
-            _service.InitializeGenresList(gameVM, genres);
-
-            return View("ListGames", gameVM);
-        }
-
-        public async Task<IActionResult> FilterGamesByName(GameVM gameVM)
-        {
-            return RedirectToAction("ListGames");
-        }
-
         [HttpGet("Update/{id}")]
         [Authorize(Roles = "Admin, Manager")]
         public async Task<IActionResult> Edit(int id)
@@ -157,66 +109,47 @@ namespace GameStoreWeb.Controllers
             return View(game);
         }
 
-        // -------------------------Handling Comments (Epic 3)-------------------------
-        public async Task<IActionResult> ReplyToComment(int id)
+        // ------------------------- Filtering (Epic 1) -------------------------
+        public async Task<IActionResult> FilterGames(GameVM gameVM)
         {
-            var comment = await _service.GetCommentByIdAsync(id);
-            var game = await _service.GetGameByIdAsync(comment.GameId);
-
-            game.CommentVM = new CommentVM
+            foreach (int id in gameVM.SelectedGenreIds)
             {
-                GameId = game.Id,
-                ParentCommentId = id
-            };
+                gameVM.Genres.Add(await _service.GetGenreById(id));
+            }
 
-            return View("Details", game);
-        }
-
-        public async Task<IActionResult> AddComment(CommentVM commentVM)
-        {
-            if (commentVM.CommentVMId != 0)
+            var gameList = new List<Game>();
+            foreach (var genre in gameVM.Genres)
             {
-                await _service.UpdateCommentAsync(commentVM);
+                foreach (var game in genre.Games)
+                {
+                    if (!gameList.Contains(game))
+                    {
+                        gameList.Add(await _service.GetGameByIdAsync(game.Id));
+                    }
+                }
+            }
+
+            if (gameVM.Name == null)
+            {
+                gameVM.Games = gameList;
             }
             else
             {
-                await _service.AddCommentAsync(commentVM, _userManager.GetUserId(User));
-            }
-            return RedirectToAction("Details", new { id = commentVM.GameId });
-        }
-
-        public async Task<IActionResult> DeleteComment(int id)
-        {
-            var comment = await _service.GetCommentByIdAsync(id);
-
-            if (_userManager.GetUserId(User) == comment.UserId
-                || _userManager.GetRolesAsync(_userManager.GetUserAsync(User).Result)
-                                            .Result.Contains("Manager")
-                || _userManager.GetRolesAsync(_userManager.GetUserAsync(User).Result)
-                                            .Result.Contains("Admin"))
-            {
-                await _service.DeleteCommentAsync(comment);
-                return RedirectToAction("Details", new { id = comment.GameId });
+                gameVM.Games = new List<Game>();
+                foreach (var game in gameList)
+                {
+                    if (game.Name.Contains(gameVM.Name,
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        gameVM.Games.Add(game);
+                    }
+                }
             }
 
-            throw new Exception("Only Admin/Managers/Users who created their comments can delete them");
-        }
+            var genres = await _service.GetGenresAsync();
+            _service.InitializeGenresList(gameVM, genres);
 
-        [HttpGet]
-        public async Task<IActionResult> UpdateComment(int id)
-        {
-            var comment = await _service.GetCommentByIdAsync(id);
-            var commentVM = new CommentVM
-            {
-                CommentVMId = comment.Id,
-                Body = comment.Body
-            };
-
-            var game = await _service.GetGameByIdAsync(comment.GameId);
-            game.CommentVM = commentVM;
-            game.CommentVM.GameId = game.Id;
-
-            return View("Details", game);
+            return View("ListGames", gameVM);
         }
 
         // -------------------------Handling Carts (Epic 4)-------------------------
@@ -300,14 +233,14 @@ namespace GameStoreWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<CustomerVM>> BuyGames()
+        public ActionResult<CustomerVM> BuyGames()
         {
             var customer = new CustomerVM();
             return View("BuyGames", customer);
         }
 
         [HttpPost]
-        public async Task<IActionResult> OrderGames(/*CustomerVM customerVM*/)
+        public async Task<IActionResult> OrderGames(CustomerVM customerVM)
         {
             if (_userManager.GetUserAsync(User).Result == null)
             {

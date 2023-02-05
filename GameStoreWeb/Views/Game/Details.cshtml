@@ -46,7 +46,7 @@
         <a asp-action="BuyGames" asp-route-id="@Model?.Id" class="buygame">Buy</a>
     }
 
-    <a asp-action="Index" class="newgame">Go Back</a>
+    <a asp-action="Index" asp-controller="Game" class="newgame">Go Back</a>
 
     @{
         <partial name="_CommentsPartial" model="@Model.CommentVM"/>

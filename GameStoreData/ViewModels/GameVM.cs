@@ -13,12 +13,12 @@ namespace GameStoreData.ViewModels
 
         public string Image { get; set; }
 
-        public virtual ICollection<Genre> Genres { get; set; } = new List<Genre>();
-
-        public IEnumerable<SelectListItem> GenresList { get; set; } = new List<SelectListItem>();
+        public ICollection<Game> Games { get; set; }
 
         public ICollection<int> SelectedGenreIds { get; set; }
 
-        public ICollection<Game> Games { get; set; }
+        public virtual ICollection<Genre> Genres { get; set; } = new List<Genre>();
+
+        public IEnumerable<SelectListItem> GenresList { get; set; } = new List<SelectListItem>();
     }
 }

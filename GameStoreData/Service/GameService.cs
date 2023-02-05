@@ -98,7 +98,7 @@ namespace GameStoreData.Service
 
         public async Task<Genre> GetGenreById(int id)
         {
-            return await _context.Genres.FirstOrDefaultAsync(g => g.Id == id);
+            return await _context.Genres.Include(g => g.Games).FirstOrDefaultAsync(g => g.Id == id);
         }
 
         public async Task<GameVM> CreateGameVMAsync(Game game)
@@ -211,7 +211,7 @@ namespace GameStoreData.Service
             return await _context.Comments.Include(c => c.ChildComments).FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        public async Task<GameVM> InitializeGenresList(GameVM gameVM, List<Genre> genres)
+        public GameVM InitializeGenresList(GameVM gameVM, List<Genre> genres)
         {
             var list = new List<SelectListItem>();
             foreach (var genre in genres)
