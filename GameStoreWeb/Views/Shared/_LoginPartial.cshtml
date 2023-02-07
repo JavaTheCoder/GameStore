@@ -8,9 +8,9 @@
 
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User)) 
-{ // TODO:ADD PAGE FOR ADMIN TO GRANT ELEVATED PERMISSIONS TO USERS
+{
     <li class="nav-item" style="margin-right:15px; margin-top:8px;">
-        <a asp-controller="Game" asp-action="GetAllCartItems" style="text-decoration:none">🛒</a> @(GameService
+        <a asp-controller="Cart" asp-action="GetAllCartItems" style="text-decoration:none">🛒</a> @(GameService
         .GetAllCartItemsByUsername(UserManager.GetUserAsync(User).Result.UserName).Count())
     </li>
     <li class="nav-item">

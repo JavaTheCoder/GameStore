@@ -9,12 +9,18 @@
 @model GameStoreData.ViewModels.CommentVM
 
 @{
+    /*
+     * Fix Comments CSS
+     * Fix Remember Me
+     * Fix Deleting Parent Comments
+    */
+
     int px = 35;
     string CalcMargin(GameStoreData.Models.Comment comment)
     {
         if (comment.ParentCommentId == null)
         {
-            px = 0;
+            return "0px";
         }
         else
         {
@@ -27,25 +33,6 @@
 
         return px + "px";
     }
-
-    /*
-    int itr = 1
-    string CalculateMargin(GameStoreData.Models.Comment comment)
-        {
-        if (comment.ParentCommentId != null)
-            {
-            if(GameService.GetCommentByIdAsync(comment.ParentCommentId.GetValueOrDefault())
-                .Result.ParentCommentId != null
-            && itr == 1)
-                {
-                px += 35;
-            itr += 1;
-        }
-        }
-
-    return px + "px";
-    }
-    */
 }
 
 <hr />
@@ -113,7 +100,7 @@
     </div>
 </div>
 
-@*
+
 <hr />
 <div>
     <dl class="row">
@@ -158,4 +145,3 @@
     }
     </dl>
 </div>
-*@

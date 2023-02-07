@@ -1,9 +1,7 @@
-﻿using GameStoreData.Identity.Data;
-using GameStoreData.Models;
+﻿using GameStoreData.Models;
 using GameStoreData.Service;
 using GameStoreData.ViewModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameStoreWeb.Controllers
@@ -11,12 +9,10 @@ namespace GameStoreWeb.Controllers
     public class GameController : Controller
     {
         private readonly GameService _service;
-        private readonly UserManager<ApplicationUser> _userManager;
 
-        public GameController(GameService service, UserManager<ApplicationUser> userManager)
+        public GameController(GameService service)
         {
             _service = service;
-            _userManager = userManager;
         }
 
         public IActionResult Index()
@@ -97,19 +93,23 @@ namespace GameStoreWeb.Controllers
                 game.CommentVM.GameId = game.Id;
             }
 
-            foreach (var comment in await _service.LoadGameCommentsById(game.Id))
-            {
-                game.CommentVM.GameComments.Add(comment);
-                if (comment.Body == game.CommentVM.Body)
-                {
-                    game.CommentVM.CommentVMId = comment.Id;
-                }
-            }
+            game.CommentVM.GameComments = await _service.LoadGameCommentsById(game.Id);
+
+            //var comments = await _service.LoadGameCommentsById(game.Id);
+
+            //foreach (var comment in comments)
+            //{
+            //    game.CommentVM.GameComments.Add(comment);
+            //    // TODO: refactor this
+            //    if (comment.Body == game.CommentVM.Body)
+            //    {
+            //        game.CommentVM.CommentVMId = comment.Id;
+            //    }
+            //}
 
             return View(game);
         }
 
-        // ------------------------- Filtering (Epic 1) -------------------------
         public async Task<IActionResult> FilterGames(GameVM gameVM)
         {
             foreach (int id in gameVM.SelectedGenreIds)
@@ -150,111 +150,6 @@ namespace GameStoreWeb.Controllers
             _service.InitializeGenresList(gameVM, genres);
 
             return View("ListGames", gameVM);
-        }
-
-        // -------------------------Handling Carts (Epic 4)-------------------------
-        [HttpGet]
-        public async Task<IActionResult> AddToCart(int id)
-        {
-            string username = _userManager.GetUserAsync(User).Result.UserName;
-            var game = await _service.GetGameByIdAsync(id);
-
-            var cart = _service.GetAllCartItemsByUsername(username)
-                .FirstOrDefault(c => c?.GameInCart?.Name == game.Name);
-            if (cart != null)
-            {
-                cart.Quantity += 1;
-                await _service.UpdateCartAsync(cart);
-                return RedirectToAction("ListGames");
-            }
-
-            await _service.SaveCartAsync(
-                new CartItem
-                {
-                    Quantity = 1,
-                    GameInCart = game,
-                    Username = username
-                }
-            );
-            return RedirectToAction("ListGames");
-        }
-
-        [HttpGet]
-        public ActionResult<IEnumerable<CartItem>> GetAllCartItems()
-        {
-            if (_userManager.GetUserAsync(User).Result == null)
-            {
-                return RedirectToAction("BuyGames");
-            }
-
-            string username = _userManager.GetUserAsync(User).Result.UserName;
-            var cartItems = _service.GetAllCartItemsByUsername(username);
-            return View("Cart", cartItems);
-        }
-
-        public async Task<IActionResult> IncreaseGameCount(int id)
-        {
-            string username = _userManager.GetUserAsync(User).Result.UserName;
-            var cart = _service.GetAllCartItemsByUsername(username)
-                .FirstOrDefault(c => c.Id == id);
-            cart.Quantity += 1;
-
-            await _service.UpdateCartAsync(cart);
-            return RedirectToAction("GetAllCartItems");
-        }
-
-        public async Task<IActionResult> DecreaseGameCount(int id)
-        {
-            string username = _userManager.GetUserAsync(User).Result.UserName;
-            var cart = _service.GetAllCartItemsByUsername(username)
-                .FirstOrDefault(c => c.Id == id);
-
-            if (cart.Quantity > 1)
-            {
-                cart.Quantity -= 1;
-                await _service.UpdateCartAsync(cart);
-            }
-            else
-            {
-                await _service.RemoveCartItemFromUserAsync(cart);
-            }
-
-            return RedirectToAction("GetAllCartItems");
-        }
-
-        public async Task<IActionResult> RemoveGameFromCart(int id)
-        {
-            string username = _userManager.GetUserAsync(User).Result.UserName;
-            var cart = _service.GetAllCartItemsByUsername(username)
-                .FirstOrDefault(c => c.Id == id);
-
-            await _service.RemoveCartItemFromUserAsync(cart);
-            return RedirectToAction("GetAllCartItems");
-        }
-
-        [HttpGet]
-        public ActionResult<CustomerVM> BuyGames()
-        {
-            var customer = new CustomerVM();
-            return View("BuyGames", customer);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> OrderGames(CustomerVM customerVM)
-        {
-            if (_userManager.GetUserAsync(User).Result == null)
-            {
-                return RedirectToAction("ListGames");
-            }
-
-            string username = _userManager.GetUserAsync(User).Result.UserName;
-            await _service.ClearAllCartItemsAsync(username);
-            return RedirectToAction("GetAllCartItems");
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
         }
     }
 }

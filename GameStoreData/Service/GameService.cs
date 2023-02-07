@@ -159,11 +159,13 @@ namespace GameStoreData.Service
 
         public async Task ClearAllCartItemsAsync(string userName)
         {
-            // TODO: Clear CartItems when user purchased
             var cart = _context.UsersCartItems.Where(c => c.Username == userName);
             if (cart != null)
             {
-                cart.ToList().RemoveRange(0, cart.Count());
+                foreach (var item in _context.UsersCartItems)
+                {
+                    _context.UsersCartItems.Remove(item);
+                }
                 await _context.SaveChangesAsync();
             }
         }
@@ -190,7 +192,7 @@ namespace GameStoreData.Service
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Comment>> LoadGameCommentsById(int id)
+        public async Task<ICollection<Comment>> LoadGameCommentsById(int id)
         {
             return await _context.Comments.Where(c => c.GameId == id).ToListAsync();
         }

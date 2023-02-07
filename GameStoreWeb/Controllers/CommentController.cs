@@ -54,10 +54,9 @@ namespace GameStoreWeb.Controllers
                                             .Result.Contains("Admin"))
             {
                 await _service.DeleteCommentAsync(comment);
-                return RedirectToAction("Details", "Game", new { id = comment.GameId });
             }
 
-            throw new Exception("Only Admin/Managers/Users who created their comments can delete them");
+            return RedirectToAction("Details", "Game", new { id = comment.GameId });
         }
 
         [HttpGet]

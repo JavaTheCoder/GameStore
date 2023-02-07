@@ -11,10 +11,10 @@
     ViewData["Title"] = "ListGames";
 }
 
-<a class="newgame" onclick="handleFilterBtn()">By Genres</a>
-<a class="newgame" onclick="handleFilterByNameBtn()">By Name</a>
-
 <div>
+    <a class="newgame" onclick="handleFilterBtn()">By Genres</a>
+    <a class="newgame" onclick="handleFilterByNameBtn()">By Name</a>
+
     <form asp-action="FilterGames">
         <div class="form-group" id="filtergames" style="display:none">
             <div class="col-sm-6 select">
@@ -34,7 +34,6 @@
 </div>
 
 <div style="text-align:center; margin-bottom:20px;">
-    @*TODO: MAKE THIS A DROPDOWN <a class="newgame" asp-action="Filter">Filter</a>*@
     @if (SignInManager.IsSignedIn(User) && !UserManager.GetRolesAsync(UserManager
         .GetUserAsync(User).Result).Result.Contains("User"))
     {
@@ -46,30 +45,30 @@
 <div>
     @foreach (var item in Model.Games)
     {
-    <div class="games-list">
-        <img src="@item.Image" alt="image" onclick="imgClick(@item.Id)">
-        <p class="details">
-            @{ string s = String.Join("/", item.Genres.Select(g => g.Name)); }
-            @(string.IsNullOrEmpty(s) ? "No Genre" : s)
-            <br>@(item.Name)
-        </p>
-        <p class="details" style="font-weight:bold">$@(item.Price)</p>
-        <div style="margin-top:15px; text-align:center;">
-            @if(SignInManager.IsSignedIn(User))
-            {
-                <a class="buygame" asp-action="AddToCart" asp-route-id="@item.Id">Add</a>
-                @if (!hide)
+        <div class="games-list">
+            <img src="@item.Image" alt="image" onclick="imgClick(@item.Id)">
+            <p class="details">
+                @{ string s = String.Join("/", item.Genres.Select(g => g.Name)); }
+                @(string.IsNullOrEmpty(s) ? "No Genre" : s)
+                <br>@(item.Name)
+            </p>
+            <p class="details" style="font-weight:bold">$@(item.Price)</p>
+            <div style="margin-top:15px; text-align:center;">
+                @if(SignInManager.IsSignedIn(User))
                 {
-                    <a class="newgame" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                    <a class="newgame" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    <a class="buygame" asp-controller="Cart" asp-action="AddToCart" asp-route-id="@item.Id">Add</a>
+                    @if (!hide)
+                    {
+                        <a class="newgame" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                        <a class="newgame" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    }
                 }
-            }
-            else
-            {
-                <a class="buygame" asp-action="BuyGames" asp-route-id="@item.Id">Buy</a>
-            }
-            </div>
-    </div>
+                else
+                {
+                    <a class="buygame" asp-controller="Cart" asp-action="BuyGames" asp-route-id="@item.Id">Buy</a>
+                }
+                </div>
+        </div>
     }
 </div>
 
