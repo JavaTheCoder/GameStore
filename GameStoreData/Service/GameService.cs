@@ -4,6 +4,7 @@ using GameStoreData.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
+#nullable disable
 namespace GameStoreData.Service
 {
     public class GameService
@@ -17,7 +18,9 @@ namespace GameStoreData.Service
 
         public async Task<Game> GetGameByIdAsync(int id)
         {
-            return await _context.Games.Include(g => g.Genres).FirstOrDefaultAsync(g => g.Id == id);
+            return await _context.Games
+                .Include(g => g.Genres)
+                .FirstOrDefaultAsync(g => g.Id == id);
         }
 
         public async Task<List<Game>> GetGamesAsync()
@@ -29,8 +32,10 @@ namespace GameStoreData.Service
         {
             var game = await GetGameByIdAsync(id);
             var gameComments = _context.Comments.Where(c => c.GameId == game.Id);
+
             _context.Games.Remove(game);
             _context.Comments.RemoveRange(gameComments);
+
             await _context.SaveChangesAsync();
         }
 
@@ -98,7 +103,9 @@ namespace GameStoreData.Service
 
         public async Task<Genre> GetGenreById(int id)
         {
-            return await _context.Genres.Include(g => g.Games).FirstOrDefaultAsync(g => g.Id == id);
+            return await _context.Genres
+                .Include(g => g.Games)
+                .FirstOrDefaultAsync(g => g.Id == id);
         }
 
         public async Task<GameVM> CreateGameVMAsync(Game game)
@@ -142,13 +149,17 @@ namespace GameStoreData.Service
 
         public CartItem GetCartByIdAndUsername(string userName, int id)
         {
-            return _context.UsersCartItems.Include(c => c.GameInCart)
-                .Where(c => c.Username == userName).FirstOrDefault(c => c.Id == id);
+            return _context.UsersCartItems
+                .Include(c => c.GameInCart)
+                .Where(c => c.Username == userName)
+                .FirstOrDefault(c => c.Id == id);
         }
 
         public IEnumerable<CartItem> GetAllCartItemsByUsername(string userName)
         {
-            return _context.UsersCartItems.Include(c => c.GameInCart).Where(c => c.Username == userName);
+            return _context.UsersCartItems
+                .Include(c => c.GameInCart)
+                .Where(c => c.Username == userName);
         }
 
         public async Task RemoveCartItemFromUserAsync(CartItem cart)
@@ -201,7 +212,15 @@ namespace GameStoreData.Service
         {
             if (comment.ChildComments != null)
             {
-                _context.Comments.RemoveRange(comment.ChildComments);
+                var children = await _context.Comments
+                    .Include(c => c.ChildComments)
+                    .Where(c => c.ParentCommentId == comment.Id)
+                    .ToListAsync();
+
+                foreach (var child in children)
+                {
+                    await DeleteCommentAsync(child);
+                }//there
             }
 
             _context.Comments.Remove(comment);
@@ -210,7 +229,9 @@ namespace GameStoreData.Service
 
         public async Task<Comment> GetCommentByIdAsync(int id)
         {
-            return await _context.Comments.Include(c => c.ChildComments).FirstOrDefaultAsync(c => c.Id == id);
+            return await _context.Comments
+                .Include(c => c.ChildComments)
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public GameVM InitializeGenresList(GameVM gameVM, List<Genre> genres)

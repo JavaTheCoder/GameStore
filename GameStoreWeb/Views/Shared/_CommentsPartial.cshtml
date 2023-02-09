@@ -1,6 +1,7 @@
 ﻿@using GameStoreData.Identity.Data;
 @using GameStoreData.Service;
 @using Microsoft.AspNetCore.Identity;
+@using GameStoreData.Models;
 
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
@@ -10,76 +11,50 @@
 
 @{
     /*
-     * Fix Comments CSS
-     * Fix Remember Me
-     * Fix Deleting Parent Comments
+    * Fix Remember Me
+    * Add Restore Button
     */
-
-    int px = 35;
-    string CalcMargin(GameStoreData.Models.Comment comment)
+    int margin = 0;
+    async Task RenderComments(Comment comment, string leftMargin)
     {
-        if (comment.ParentCommentId == null)
-        {
-            return "0px";
-        }
-        else
-        {
-            var parentComment = GameService.GetCommentByIdAsync(comment.ParentCommentId.GetValueOrDefault()).Result;
-            if (parentComment.ChildComments.FirstOrDefault() == comment)
-            {
-                px += 35;
-            }
-        }
+        <dd class="col-sm-10 comment" style="margin-left:@leftMargin; margin-bottom:8px;">
+            <p class="user_comment">
+                @(comment.UserId != null ? UserManager.FindByIdAsync(comment.UserId).Result.UserName : "Guest")
+                <h10 style="font-weight:bold">@comment.TimeLeft</h10>
+            </p>
+            <h5>@comment.Body</h5>
 
-        return px + "px";
+            <div style="margin-bottom: 15px">
+                <a asp-controller="Comment" asp-action="ReplyToComment" asp-route-id="@comment.Id">Reply</a> |
+                <a asp-controller="Comment" asp-action="UpdateComment" asp-route-id="@comment.Id">Edit</a> |
+                <a asp-controller="Comment" asp-action="DeleteComment" asp-route-id="@comment.Id">Delete</a>
+            </div>
+        </dd>
+
+        if (comment.ChildComments != null)
+        {
+            margin += 35;
+            foreach (var child in comment.ChildComments)
+            {
+                RenderComments(child, $"{margin}px");
+            }
+            margin -= 35;
+        }
     }
 }
 
 <hr />
 <div>
     <dl class="row">
-    @foreach (var comment in Model.GameComments)
-    {
-        <dd class="col-sm-10 comment" style="margin-left:@CalcMargin(comment);margin-bottom:8px;">
-            <p class="user_comment">
-                @(comment.UserId != null ? UserManager.FindByIdAsync(comment.UserId).Result.UserName : "Guest")
-                <h10 style="font-weight:bold">@comment.TimeLeft</h10>
-            </p>
-            <h5>@comment.Body</h5>
-
-            <div style="margin-bottom:15px">
-                <a asp-controller="Comment" asp-action="ReplyToComment" asp-route-id="@comment.Id">Reply</a> |
-                <a asp-controller="Comment" asp-action="UpdateComment" asp-route-id="@comment.Id">Edit</a> |
-                <a asp-controller="Comment" asp-action="DeleteComment" asp-route-id="@comment.Id">Delete</a>
-            </div>
-        </dd>
-    }
+        @foreach (var comment in Model.GameComments)
+        {
+            if (comment.ParentCommentId == null)
+            {
+                RenderComments(comment, "0px");
+            }
+        }
     </dl>
 </div>
-
-@*<hr />
-<div>
-    <dl class="row">
-    @foreach (var comment in Model.GameComments)
-    {
-        <dd class="col-sm-10 comment" id="hide_comment" style="margin-left:@CalcMargin(comment);margin-bottom:8px;">
-            <p class="user_comment">
-                @(comment.UserId != null ? UserManager.FindByIdAsync(comment.UserId).Result.UserName : "Guest")
-                <h10 style="font-weight:bold">@comment.TimeLeft</h10>
-            </p>
-            <h5>@comment.Body</h5>
-
-            <div style="margin-bottom:15px">
-                <a asp-controller="Comment" asp-action="ReplyToComment" asp-route-id="@comment.Id">Reply</a> |
-                <a asp-controller="Comment" asp-action="UpdateComment" asp-route-id="@comment.Id">Edit</a> |
-                <a asp-controller="Comment" asp-action="DeleteComment" asp-route-id="@comment.Id">Delete</a>
-                <a href="#hide_comment" onclick="hideCommentOnDelete()">Delete</a>
-                <a href="#hide_comment" onclick="unhideCommentOnRevert()" id="revert_btn" style="display:none">Revert</a>
-            </div>
-        </dd>
-    }
-    </dl>
-</div>*@
 
 <div class="row">
     <div class="col-md-4">
@@ -98,50 +73,4 @@
             <input type="hidden" asp-for="@Model.ParentCommentId" />
         </form>
     </div>
-</div>
-
-
-<hr />
-<div>
-    <dl class="row">
-    @foreach (var comment in Model.GameComments)
-    {
-        if (comment.ParentCommentId == null)
-        {
-            <dd class="col-sm-10 comment" style="margin-bottom:8px;">
-                <p class="user_comment">
-                    @(comment.UserId != null ? UserManager.FindByIdAsync(comment.UserId).Result.UserName : "Guest")
-                    <h10 style="font-weight:bold">@comment.TimeLeft</h10>
-                </p>
-                <h5>@comment.Body</h5>
-
-                <div style="margin-bottom: 15px">
-                    <a asp-controller="Comment" asp-action="ReplyToComment" asp-route-id="@comment.Id">Reply</a> |
-                    <a asp-controller="Comment" asp-action="UpdateComment" asp-route-id="@comment.Id">Edit</a> |
-                    <a asp-controller="Comment" asp-action="DeleteComment" asp-route-id="@comment.Id">Delete</a>
-                </div>
-            </dd>
-        }
-
-        if (comment.ChildComments != null)
-        {
-            @foreach (var child in comment.ChildComments)
-            {
-                <dd class="col-sm-10 comment" style="margin-left:@CalculateMargin(comment); margin-bottom:8px;">
-                    <p class="user_comment">
-                        @(child.UserId != null ? UserManager.FindByIdAsync(child.UserId).Result.UserName : "Guest")
-                        <h10 style="font-weight:bold">@child.TimeLeft</h10>
-                    </p>
-                    <h5>@child.Body</h5>
-
-                    <div style="margin-bottom: 15px">
-                        <a asp-controller="Comment" asp-action="ReplyToComment" asp-route-id="@child.Id">Reply</a> |
-                        <a asp-controller="Comment" asp-action="UpdateComment" asp-route-id="@child.Id">Edit</a> |
-                        <a asp-controller="Comment" asp-action="DeleteComment" asp-route-id="@child.Id">Delete</a>
-                    </div>
-                </dd>
-            }
-        }
-    }
-    </dl>
 </div>

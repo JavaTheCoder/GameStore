@@ -94,19 +94,6 @@ namespace GameStoreWeb.Controllers
             }
 
             game.CommentVM.GameComments = await _service.LoadGameCommentsById(game.Id);
-
-            //var comments = await _service.LoadGameCommentsById(game.Id);
-
-            //foreach (var comment in comments)
-            //{
-            //    game.CommentVM.GameComments.Add(comment);
-            //    // TODO: refactor this
-            //    if (comment.Body == game.CommentVM.Body)
-            //    {
-            //        game.CommentVM.CommentVMId = comment.Id;
-            //    }
-            //}
-
             return View(game);
         }
 
