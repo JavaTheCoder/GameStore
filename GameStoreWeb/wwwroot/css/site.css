@@ -91,7 +91,7 @@ img {
     width: 300px;
 }
 
-.newgame {
+.button {
     background-color: cornflowerblue;
     color: white;
     padding: 5px 15px;
@@ -102,7 +102,7 @@ img {
     border-radius: 5px;
 }
 
-.newgame:hover,
+.button:hover,
 .buygame:hover {
     color: darkblue;
 }

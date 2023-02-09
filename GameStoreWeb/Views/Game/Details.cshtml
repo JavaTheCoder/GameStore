@@ -12,44 +12,40 @@
     ViewData["Title"] = "GetGame";
 }
 
-<h1>Game Details</h1>
+<h1>@Model.Name</h1>
 <hr />
 
 <div>
     <dl class="row">
-        <dd class="col-sm-10">
+        <dd class="col-sm-3">
             <img src="@Model.Image" alt="image" height="100" width="100">
         </dd>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dd class="col-sm-10">
-            @{ string s = String.Join("/", Model.Genres.Select(g => g.Name)); }
-            @(string.IsNullOrEmpty(s) ? "No Genre" : s)
-        </dd>
-        <dd class = "col-sm-10">
-            $@Html.DisplayFor(model => model.Price)
+
+        <dd class="col-sm-3" style="text-align:center">
+            <br /><br /><br />
+            <h3 style="font-size:30px;">@(String.Join("/", Model.Genres.Select(g => g.Name)))</h3>
+            <h3 style="font-size:30px;"> $@Html.DisplayFor(model => model.Price)</h3>
+            <br /><br />
+            <div>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                   @if (!UserManager.GetRolesAsync(UserManager
+                   .GetUserAsync(User).Result).Result.Contains("User"))
+                   {
+                        <a asp-action="Edit" asp-route-id="@Model?.Id" class="button">Update</a>
+                   }
+                   <a asp-controller="Cart" asp-action="AddToCart" asp-route-id="@Model?.Id" class="buygame">Add to Cart</a>
+                }
+                else
+                {
+                    <a asp-controller="Cart" asp-action="BuyGames" asp-route-id="@Model?.Id" class="buygame">Buy</a>
+                }
+                <a asp-action="Index" asp-controller="Game" class="button">Go Back</a>
+            </div>
         </dd>
     </dl>
 </div>
-<div>
-    @if (SignInManager.IsSignedIn(User))
-    {
-        @if (!UserManager.GetRolesAsync(UserManager
-        .GetUserAsync(User).Result).Result.Contains("User"))
-        {
-            <a asp-action="Edit" asp-route-id="@Model?.Id" class="newgame">Edit</a>
-        }
-        <a asp-controller="Cart" asp-action="AddToCart" asp-route-id="@Model?.Id" class="buygame">Add</a>
-    }
-    else {
-        <a asp-controller="Cart" asp-action="BuyGames" asp-route-id="@Model?.Id" class="buygame">Buy</a>
-    }
 
-    <a asp-action="Index" asp-controller="Game" class="newgame">Go Back</a>
-
-    @{
-        <partial name="_CommentsPartial" model="@Model.CommentVM"/>
-    }
-
-</div>
+@{
+    <partial name="_CommentsPartial" model="@Model.CommentVM" />
+}

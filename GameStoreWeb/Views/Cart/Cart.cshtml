@@ -13,11 +13,19 @@
         return String.Format("{0:0.00}", price);
     }
 }
-
-<div style="text-align: center; margin-bottom: 20px;">
-    <a asp-action="BuyGames" class="newgame">Proceed</a>
-    <p style ="font-weight:bold">Total: $@CalculateTotal()</p>
-</div>
+@if(Model.Any())
+{
+    <div style="text-align: center; margin-bottom: 20px;">
+        <a asp-action="BuyGames" class="button">Proceed</a>
+        <p style="font-weight:bold">Total: $@CalculateTotal()</p>
+    </div>
+} 
+else
+{
+    <div style="text-align: center; margin-bottom: 20px;">
+        <p style="font-size:35px;">No Items in the Cart</p>
+    </div>
+}
 
 <div>
     @foreach (var item in Model)
@@ -32,16 +40,16 @@
                 Total: $@(String.Format("{0:0.00}", item.GameInCart.Price * item.Quantity))
             </p>
             <div style="margin-top:15px; text-align:center;">
-                <a class="newgame" asp-action="IncreaseGameCount" asp-route-id="@item.Id">+</a>
-                <a class="newgame" asp-action="RemoveGameFromCart" asp-route-id="@item.Id">×</a>
-                <a class="newgame" asp-action="DecreaseGameCount" asp-route-id="@item.Id">-</a>
+                <a class="button" asp-action="IncreaseGameCount" asp-route-id="@item.Id">+</a>
+                <a class="button" asp-action="RemoveGameFromCart" asp-route-id="@item.Id">×</a>
+                <a class="button" asp-action="DecreaseGameCount" asp-route-id="@item.Id">-</a>
             </div>
         </div>
     }
 </div>
 
 <div style="text-align:center; margin-top:20px">
-    <a asp-controller="Game" asp-action="Index" class="newgame">Go Back</a>
+    <a asp-controller="Game" asp-action="Index" class="button">Go Back</a>
 </div>
 
 <div class="row" style="clear: both"></div>

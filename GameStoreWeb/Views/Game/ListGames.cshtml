@@ -12,8 +12,8 @@
 }
 
 <div>
-    <a class="newgame" onclick="handleFilterBtn()">By Genres</a>
-    <a class="newgame" onclick="handleFilterByNameBtn()">By Name</a>
+    <a class="button" onclick="handleFilterBtn()">By Genres</a>
+    <a class="button" onclick="handleFilterByNameBtn()">By Name</a>
 
     <form asp-action="FilterGames">
         <div class="form-group" id="filtergames" style="display:none">
@@ -28,7 +28,7 @@
         </div>
 
         <div class="form-group">
-            <input type="submit" value="Filter" class="newgame" />
+            <input type="submit" value="Filter" class="button" />
         </div>
     </form>
 </div>
@@ -38,7 +38,7 @@
         .GetUserAsync(User).Result).Result.Contains("User"))
     {
         hide = false;
-        <a class="newgame" asp-action="Create">New Game</a>
+        <a class="button" asp-action="Create">New Game</a>
     }
 </div>
 
@@ -59,8 +59,8 @@
                     <a class="buygame" asp-controller="Cart" asp-action="AddToCart" asp-route-id="@item.Id">Add</a>
                     @if (!hide)
                     {
-                        <a class="newgame" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                        <a class="newgame" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        <a class="button" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                        <a class="button" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
                     }
                 }
                 else

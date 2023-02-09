@@ -53,7 +53,8 @@ namespace GameStoreWeb.Controllers
                 || _userManager.GetRolesAsync(_userManager.GetUserAsync(User).Result)
                                             .Result.Contains("Admin"))
             {
-                await _service.DeleteCommentAsync(comment);
+                //await _service.DeleteCommentAsync(comment);
+                //comment.IsActive = false;
             }
 
             return RedirectToAction("Details", "Game", new { id = comment.GameId });

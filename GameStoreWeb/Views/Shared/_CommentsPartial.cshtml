@@ -14,29 +14,59 @@
     * Fix Remember Me
     * Add Restore Button
     */
-    int margin = 0;
-    async Task RenderComments(Comment comment, string leftMargin)
+    bool restoreActive = false;
+
+    int margin = 10;
+    async Task RenderComments(Comment comment, string leftMargin = "10px")
     {
-        <dd class="col-sm-10 comment" style="margin-left:@leftMargin; margin-bottom:8px;">
+        //if (!comment.IsActive) {
+        //   restoreActive = !restoreActive;
+        //   if (!restoreActive) 
+        //   {
+        //      await GameService.DeleteCommentAsync(comment);
+        //   }
+        //   <button class="button" id="restore-btn" style="margin-bottom:7px;" onclick="hideCommentOnDelete()">Restore</button>
+        // }
+        // else 
+        // {
+        //  <dd id="comment" class="col-sm-10 comment" style="margin-left:@leftMargin; margin-bottom:8px;">
+        //    <p class="user_comment">
+        //        @(comment.UserId != null ? UserManager.FindByIdAsync(comment.UserId).Result.UserName : "Guest")
+        //        <h10 style="font-weight:bold">@comment.TimeLeft</h10>
+        //    </p>
+        //    <h5>@comment.Body</h5>
+
+        //    <div style="margin-bottom:15px;">
+        //        <a asp-controller="Comment" asp-action="ReplyToComment" asp-route-id="@comment.Id">Reply</a> |
+        //        <a asp-controller="Comment" asp-action="UpdateComment" asp-route-id="@comment.Id">Edit</a> |
+        //         @*<a href="#" onclick="hideCommentOnDelete()">Delete</a>*@
+        //        <a asp-controller="Comment" asp-action="DeleteComment" asp-route-id="@comment.Id">Delete</a>
+        //    </div>
+        //  </dd>
+        // }
+        <dd id="comment" class="col-sm-10 comment" style="margin-left:@leftMargin; margin-bottom:8px;">
             <p class="user_comment">
                 @(comment.UserId != null ? UserManager.FindByIdAsync(comment.UserId).Result.UserName : "Guest")
                 <h10 style="font-weight:bold">@comment.TimeLeft</h10>
             </p>
             <h5>@comment.Body</h5>
 
-            <div style="margin-bottom: 15px">
+            <div style="margin-bottom:15px;">
                 <a asp-controller="Comment" asp-action="ReplyToComment" asp-route-id="@comment.Id">Reply</a> |
                 <a asp-controller="Comment" asp-action="UpdateComment" asp-route-id="@comment.Id">Edit</a> |
-                <a asp-controller="Comment" asp-action="DeleteComment" asp-route-id="@comment.Id">Delete</a>
+                <a href="#" onclick="hideCommentOnDelete()">Delete</a>
+                @*<<a asp-controller="Comment" asp-action="DeleteComment" asp-route-id="@comment.Id">Delete</a> amogus*@
             </div>
         </dd>
+
+        <button class="button" id="restore-btn" style="margin-bottom:7px;display:none" onclick="hideCommentOnDelete()">Restore</button>
 
         if (comment.ChildComments != null)
         {
             margin += 35;
             foreach (var child in comment.ChildComments)
             {
-                RenderComments(child, $"{margin}px");
+                await RenderComments(child, $"{margin}px");
             }
             margin -= 35;
         }
@@ -50,7 +80,7 @@
         {
             if (comment.ParentCommentId == null)
             {
-                RenderComments(comment, "0px");
+                await RenderComments(comment);
             }
         }
     </dl>
@@ -66,7 +96,7 @@
                 <span asp-validation-for="Body" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Add" class="newgame" />
+                <input type="submit" value="Add" class="button" />
             </div>
             <input type="hidden" asp-for="@Model.CommentVMId" />
             <input type="hidden" asp-for="@Model.GameId" />
