@@ -42,15 +42,11 @@ namespace GameStoreWeb.Controllers
         [HttpGet("Games")]
         public async Task<IActionResult> ListGames()
         {
-            var games = await _service.GetGamesAsync();
-            var gameVM = new GameVM
-            {
-                Games = games
-            };
+            var gameVM = new GameVM();
+            gameVM.Games = await _service.GetGamesAsync();
 
             var genres = await _service.GetGenresAsync();
             _service.InitializeGenresList(gameVM, genres);
-
             gameVM.SelectedGenreIds = genres.Select(g => g.Id).ToList();
 
             return View(gameVM);
@@ -82,18 +78,27 @@ namespace GameStoreWeb.Controllers
             return RedirectToAction("ListGames");
         }
 
-        [HttpGet("Game/{id}")]
-        public async Task<IActionResult> Details(int id)
+        [HttpGet("Details/{id}")]
+        public async Task<IActionResult> Details(int id, bool redirected)
         {
             var game = await _service.GetGameByIdAsync(id);
-
-            if (game.CommentVM == null)
+            if (redirected == false)
             {
-                game.CommentVM = new CommentVM();
-                game.CommentVM.GameId = game.Id;
+                var comments = await _service.LoadGameCommentsById(game.Id);
+                var inactiveComments = comments.Where(c => c.IsActive == false);
+                foreach (var c in inactiveComments)
+                {
+                    await _service.DeleteCommentAsync(c);
+                }
             }
 
-            game.CommentVM.GameComments = await _service.LoadGameCommentsById(game.Id);
+            game.CommentVM = new CommentVM
+            {
+                GameId = game.Id,
+                GameComments = await
+                    _service.LoadGameCommentsById(game.Id)
+            };
+
             return View(game);
         }
 
@@ -116,22 +121,14 @@ namespace GameStoreWeb.Controllers
                 }
             }
 
-            if (gameVM.Name == null)
-            {
-                gameVM.Games = gameList;
-            }
-            else
-            {
-                gameVM.Games = new List<Game>();
-                foreach (var game in gameList)
-                {
-                    if (game.Name.Contains(gameVM.Name,
-                        StringComparison.OrdinalIgnoreCase))
-                    {
-                        gameVM.Games.Add(game);
-                    }
-                }
-            }
+            // if filtered by genres - return gameList
+            // if filtered by name - return gameList where game.Name.Contains(name)
+            gameVM.Games = (gameVM.Name == null) ? gameList : gameList
+                    .Where(g => g.Name
+                    .Contains(gameVM.Name, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+
 
             var genres = await _service.GetGenresAsync();
             _service.InitializeGenresList(gameVM, genres);

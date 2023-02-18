@@ -7,7 +7,7 @@
 @inject SignInManager<ApplicationUser> SignInManager
 
 @{
-    bool hide = true;
+    bool hideChangeBtns = true;
     ViewData["Title"] = "ListGames";
 }
 
@@ -37,7 +37,7 @@
     @if (SignInManager.IsSignedIn(User) && !UserManager.GetRolesAsync(UserManager
         .GetUserAsync(User).Result).Result.Contains("User"))
     {
-        hide = false;
+        hideChangeBtns = false;
         <a class="button" asp-action="Create">New Game</a>
     }
 </div>
@@ -57,7 +57,7 @@
                 @if(SignInManager.IsSignedIn(User))
                 {
                     <a class="buygame" asp-controller="Cart" asp-action="AddToCart" asp-route-id="@item.Id">Add</a>
-                    @if (!hide)
+                    @if (!hideChangeBtns)
                     {
                         <a class="button" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
                         <a class="button" asp-action="Delete" asp-route-id="@item.Id">Delete</a>

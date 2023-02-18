@@ -119,18 +119,18 @@ namespace GameStoreData.Service
                 Genres = game.Genres
             };
 
-            var list = new List<SelectListItem>();
-            foreach (var genre in await GetGenresAsync())
-            {
-                list.Add(new SelectListItem()
-                {
-                    Text = genre.Name,
-                    Value = genre.Id.ToString(),
-                });
-            }
-
-            gameVM.GenresList = list;
+            gameVM = InitializeGenresList(gameVM, await GetGenresAsync());
             gameVM.SelectedGenreIds = game.Genres.Select(g => g.Id).ToList();
+
+            return gameVM;
+        }
+
+        public GameVM InitializeGenresList(GameVM gameVM, List<Genre> genres)
+        {
+            //c
+            gameVM.GenresList = genres.Select(g =>
+                new SelectListItem(g.Name, g.Id.ToString()));
+
             return gameVM;
         }
 
@@ -220,7 +220,7 @@ namespace GameStoreData.Service
                 foreach (var child in children)
                 {
                     await DeleteCommentAsync(child);
-                }//there
+                }
             }
 
             _context.Comments.Remove(comment);
@@ -234,20 +234,10 @@ namespace GameStoreData.Service
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        public GameVM InitializeGenresList(GameVM gameVM, List<Genre> genres)
+        public async Task ChangeCommentStateAsync(Comment comment)
         {
-            var list = new List<SelectListItem>();
-            foreach (var genre in genres)
-            {
-                list.Add(new SelectListItem()
-                {
-                    Text = genre.Name,
-                    Value = genre.Id.ToString(),
-                });
-            }
-
-            gameVM.GenresList = list;
-            return gameVM;
+            comment.IsActive = !comment.IsActive;
+            await _context.SaveChangesAsync();
         }
     }
 }
