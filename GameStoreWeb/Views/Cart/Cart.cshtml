@@ -31,7 +31,7 @@ else
     @foreach (var item in Model)
     {
         <div class="games-list">
-            <img src="@item.GameInCart.Image" alt="image" onclick="imgClick(@item.Id)">
+            <img src="@item.GameInCart.Image" alt="image" onclick="imgClick(@item.GameInCart.Id)">
             <p class="details">
                 @item.GameInCart.Name
             </p>

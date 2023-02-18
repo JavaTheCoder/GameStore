@@ -1,4 +1,5 @@
 ﻿using GameStoreData.Identity.Data;
+using GameStoreData.Models;
 using GameStoreData.Service;
 using GameStoreData.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -41,7 +42,7 @@ namespace GameStoreWeb.Controllers
             {
                 await _service.AddCommentAsync(commentVM, _userManager.GetUserId(User));
             }
-            return RedirectToAction("Details", "Game", new { id = commentVM.GameId });
+            return RedirectToAction("Details", "Game", new { id = commentVM.GameId, redirected = true });
         }
 
         public async Task<IActionResult> DeleteComment(int id)
@@ -53,26 +54,41 @@ namespace GameStoreWeb.Controllers
                 || _userManager.GetRolesAsync(_userManager.GetUserAsync(User).Result)
                                             .Result.Contains("Admin"))
             {
-                //await _service.DeleteCommentAsync(comment);
-                //comment.IsActive = false;
+                await _service.ChangeCommentStateAsync(comment);
             }
 
-            return RedirectToAction("Details", "Game", new { id = comment.GameId });
+            return RedirectToAction("Details", "Game", new { id = comment.GameId, redirected = true });
+        }
+
+        public async Task<IActionResult> RestoreComment(int id)
+        {
+            var comment = await _service.GetCommentByIdAsync(id);
+            await _service.ChangeCommentStateAsync(comment);
+
+            return RedirectToAction("Details", "Game", new { id = comment.GameId, redirected = true });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DeleteCommentForever(int id)
+        {
+            var comment = await _service.GetCommentByIdAsync(id);
+            await _service.DeleteCommentAsync(comment);
+
+            return RedirectToAction("Details", "Game", new { id = comment.GameId, redirected = true });
         }
 
         [HttpGet]
         public async Task<IActionResult> UpdateComment(int id)
         {
             var comment = await _service.GetCommentByIdAsync(id);
-            var commentVM = new CommentVM
+            var game = await _service.GetGameByIdAsync(comment.GameId);
+
+            game.CommentVM = new CommentVM
             {
                 CommentVMId = comment.Id,
-                Body = comment.Body
+                Body = comment.Body,
+                GameId = game.Id
             };
-
-            var game = await _service.GetGameByIdAsync(comment.GameId);
-            game.CommentVM = commentVM;
-            game.CommentVM.GameId = game.Id;
 
             return View("Views/Game/Details.cshtml", game);
         }
