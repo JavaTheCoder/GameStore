@@ -127,6 +127,7 @@ namespace GameStoreData.Service
 
         public GameVM InitializeGenresList(GameVM gameVM, List<Genre> genres)
         {
+            //c
             gameVM.GenresList = genres.Select(g =>
                 new SelectListItem(g.Name, g.Id.ToString()));
 
