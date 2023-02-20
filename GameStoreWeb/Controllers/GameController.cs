@@ -82,7 +82,7 @@ namespace GameStoreWeb.Controllers
         public async Task<IActionResult> Details(int id, bool redirected)
         {
             var game = await _service.GetGameByIdAsync(id);
-            if (redirected == false)
+            if (!redirected)
             {
                 var comments = await _service.LoadGameCommentsById(game.Id);
                 var inactiveComments = comments.Where(c => c.IsActive == false);
@@ -104,22 +104,7 @@ namespace GameStoreWeb.Controllers
 
         public async Task<IActionResult> FilterGames(GameVM gameVM)
         {
-            foreach (int id in gameVM.SelectedGenreIds)
-            {
-                gameVM.Genres.Add(await _service.GetGenreById(id));
-            }
-
-            var gameList = new List<Game>();
-            foreach (var genre in gameVM.Genres)
-            {
-                foreach (var game in genre.Games)
-                {
-                    if (!gameList.Contains(game))
-                    {
-                        gameList.Add(await _service.GetGameByIdAsync(game.Id));
-                    }
-                }
-            }
+            var gameList = await _service.GetGamesWithSelectedGenresAsync(gameVM.SelectedGenreIds);
 
             // if filtered by genres - return gameList
             // if filtered by name - return gameList where game.Name.Contains(name)
@@ -127,8 +112,6 @@ namespace GameStoreWeb.Controllers
                     .Where(g => g.Name
                     .Contains(gameVM.Name, StringComparison.OrdinalIgnoreCase))
                     .ToList();
-
-
 
             var genres = await _service.GetGenresAsync();
             _service.InitializeGenresList(gameVM, genres);

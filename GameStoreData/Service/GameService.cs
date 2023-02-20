@@ -53,7 +53,7 @@ namespace GameStoreData.Service
 
             foreach (int id in gameVM.SelectedGenreIds)
             {
-                game.Genres.Add(await GetGenreById(id));
+                game.Genres.Add(await GetGenreByIdAsync(id));
             }
 
             return game;
@@ -96,12 +96,7 @@ namespace GameStoreData.Service
             return await _context.Genres.ToListAsync();
         }
 
-        public async Task<List<Genre>> GetGenresAsSelectListAsync()
-        {
-            return await _context.Genres.ToListAsync();
-        }
-
-        public async Task<Genre> GetGenreById(int id)
+        public async Task<Genre> GetGenreByIdAsync(int id)
         {
             return await _context.Genres
                 .Include(g => g.Games)
@@ -125,9 +120,19 @@ namespace GameStoreData.Service
             return gameVM;
         }
 
+        public async Task<ICollection<Game>> GetGamesWithSelectedGenresAsync(ICollection<int> selectedGenresIds)
+        {
+            return await _context.Games
+                .AsNoTracking()
+                .Include(g => g.Genres)
+                .Where(g => g.Genres
+                .Any(g => selectedGenresIds
+                .Contains(g.Id)))
+                .ToListAsync();
+        }
+
         public GameVM InitializeGenresList(GameVM gameVM, List<Genre> genres)
         {
-            //c
             gameVM.GenresList = genres.Select(g =>
                 new SelectListItem(g.Name, g.Id.ToString()));
 
