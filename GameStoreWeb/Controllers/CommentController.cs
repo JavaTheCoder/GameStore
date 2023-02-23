@@ -42,10 +42,10 @@ namespace GameStoreWeb.Controllers
             {
                 await _service.AddCommentAsync(commentVM, _userManager.GetUserId(User));
             }
-            return RedirectToAction("Details", "Game", new { id = commentVM.GameId, redirected = true });
+            return RedirectToAction("Details", "Game", new { id = commentVM.GameId });
         }
 
-        public async Task<IActionResult> DeleteComment(int id)
+        public async Task<IActionResult> ChangeCommentState(int id)
         {
             var comment = await _service.GetCommentByIdAsync(id);
             if (_userManager.GetUserId(User) == comment.UserId
@@ -57,24 +57,8 @@ namespace GameStoreWeb.Controllers
                 await _service.ChangeCommentStateAsync(comment);
             }
 
-            return RedirectToAction("Details", "Game", new { id = comment.GameId, redirected = true });
-        }
-
-        public async Task<IActionResult> RestoreComment(int id)
-        {
-            var comment = await _service.GetCommentByIdAsync(id);
-            await _service.ChangeCommentStateAsync(comment);
-
-            return RedirectToAction("Details", "Game", new { id = comment.GameId, redirected = true });
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> DeleteCommentForever(int id)
-        {
-            var comment = await _service.GetCommentByIdAsync(id);
-            await _service.DeleteCommentAsync(comment);
-
-            return RedirectToAction("Details", "Game", new { id = comment.GameId, redirected = true });
+            TempData["IsRedirected"] = true;
+            return RedirectToAction("Details", "Game", new { id = comment.GameId });
         }
 
         [HttpGet]

@@ -14,7 +14,7 @@
     async Task RenderComments(Comment comment, string leftMargin = "10px")
     {
         if (!comment.IsActive) {
-            <a asp-controller="Comment" id="restore-btn" style="margin-bottom:7px;" asp-action="RestoreComment" asp-route-id="@comment.Id">Restore</a>
+            <a asp-controller="Comment" id="restore-btn" style="margin-bottom:7px;" asp-action="ChangeCommentState" asp-route-id="@comment.Id">Restore</a>
         }
         else 
         {
@@ -28,7 +28,7 @@
                 <div style="margin-bottom:15px;">
                     <a asp-controller="Comment" asp-action="ReplyToComment" asp-route-id="@comment.Id">Reply</a> |
                     <a asp-controller="Comment" asp-action="UpdateComment" asp-route-id="@comment.Id">Edit</a> |
-                    <a asp-controller="Comment" asp-action="DeleteComment" asp-route-id="@comment.Id" onclick="markForDelete(@(comment.Id))">Delete</a>
+                    <a asp-controller="Comment" asp-action="ChangeCommentState" asp-route-id="@comment.Id">Delete</a>
                 </div>
             </dd>
 
@@ -76,36 +76,3 @@
         </form>
     </div>
 </div>
-
-<script type="text/javascript">
-    //function markForDelete(id) {
-    //    localStorage.setItem('commentToDelete', 'Tom');
-    //}
-
-    //function addCommentForDeletion(id) {
-    //    let comments = JSON.parse(localStore.getItem('commentsToDelete'));
-    //    if (comments.findIndex(el => el == id) < 0) {
-    //        comments.push(id);
-    //        localStorage.setItem('commentsToDelete', JSON.stringify(comments));
-    //    }
-    //}
-
-    //function deleteComment(id) {
-    //    let comments = JSON.parse(localStore.getItem('commentsToDelete'));
-
-    //    if (comments.findIndex(el => el == id) >= 0) {
-    //        //delete it from array
-
-    //        //call a method to delete 
-
-    //        localStorage.setItem('commentsToDelete', JSON.stringify(comments));
-    //        //comments.delete(id); 
-
-    //    }
-    //}
-
-    //$(function () {
-    //    // here I delete comments that are in localstorage first
-    //  // here I load list of comments then
-    //})
-</script>

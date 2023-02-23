@@ -11,29 +11,32 @@ namespace GameStoreWeb.Controllers
     {
         private readonly GameService _service;
         private readonly UserManager<ApplicationUser> _userManager;
+        //private readonly string username;
 
         public CartController(GameService service, UserManager<ApplicationUser> userManager)
         {
             _service = service;
             _userManager = userManager;
+            //username = userManager.GetUserAsync(User).Result.UserName;
         }
 
+        // TODO: TEST THIS METHOD
         [HttpGet]
         public async Task<IActionResult> AddToCart(int id)
         {
             string username = _userManager.GetUserAsync(User).Result.UserName;
             var game = await _service.GetGameByIdAsync(id);
 
-            var cart = _service.GetAllCartItemsByUsername(username)
+            var cartItem = _service.GetAllCartItemsByUsername(username)
                 .FirstOrDefault(c => c?.GameInCart?.Name == game.Name);
-            if (cart != null)
+            if (cartItem != null)
             {
-                cart.Quantity += 1;
-                await _service.UpdateCartAsync(cart);
+                cartItem.Quantity += 1;
+                await _service.UpdateCartAsync(cartItem);
                 return RedirectToAction("ListGames", "Game");
             }
 
-            await _service.SaveCartAsync(
+            await _service.AddNewCartAsync(
                 new CartItem
                 {
                     Quantity = 1,

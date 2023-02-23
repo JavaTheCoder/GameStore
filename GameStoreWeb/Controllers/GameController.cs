@@ -79,25 +79,12 @@ namespace GameStoreWeb.Controllers
         }
 
         [HttpGet("Details/{id}")]
-        public async Task<IActionResult> Details(int id, bool redirected)
+        public async Task<IActionResult> Details(int id)
         {
-            var game = await _service.GetGameByIdAsync(id);
-            if (!redirected)
-            {
-                var comments = await _service.LoadGameCommentsById(game.Id);
-                var inactiveComments = comments.Where(c => c.IsActive == false);
-                foreach (var c in inactiveComments)
-                {
-                    await _service.DeleteCommentAsync(c);
-                }
-            }
+            TempData.TryGetValue("IsRedirected", out var isRedirected);
 
-            game.CommentVM = new CommentVM
-            {
-                GameId = game.Id,
-                GameComments = await
-                    _service.LoadGameCommentsById(game.Id)
-            };
+            var game = await _service.GetGameAndDeleteInactiveComments((bool?)isRedirected ?? false, id);
+            TempData["IsRedirected"] = false;
 
             return View(game);
         }

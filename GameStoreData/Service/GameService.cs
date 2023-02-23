@@ -11,12 +11,16 @@ namespace GameStoreData.Service
     {
         private readonly ApplicationDbContext _context;
 
+        public GameService()
+        {
+        }
+
         public GameService(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        public async Task<Game> GetGameByIdAsync(int id)
+        public virtual async Task<Game> GetGameByIdAsync(int id)
         {
             return await _context.Games
                 .Include(g => g.Genres)
@@ -139,17 +143,23 @@ namespace GameStoreData.Service
             return gameVM;
         }
 
-        public async Task SaveCartAsync(CartItem cartItem)
+        public virtual async Task AddNewCartAsync(CartItem cartItem)
         {
             _context.Add(cartItem);
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateCartAsync(CartItem cartItem)
+        public virtual async Task UpdateCartAsync(CartItem cartItem)
+        {
+            GetOldCartWithUpdatedQuantity(cartItem);
+            await _context.SaveChangesAsync();
+        }
+
+        public CartItem GetOldCartWithUpdatedQuantity(CartItem cartItem)
         {
             var oldCart = GetCartByIdAndUsername(cartItem.Username, cartItem.Id);
             oldCart.Quantity = cartItem.Quantity;
-            await _context.SaveChangesAsync();
+            return oldCart;
         }
 
         public CartItem GetCartByIdAndUsername(string userName, int id)
@@ -160,7 +170,7 @@ namespace GameStoreData.Service
                 .FirstOrDefault(c => c.Id == id);
         }
 
-        public IEnumerable<CartItem> GetAllCartItemsByUsername(string userName)
+        public virtual IEnumerable<CartItem> GetAllCartItemsByUsername(string userName)
         {
             return _context.UsersCartItems
                 .Include(c => c.GameInCart)
@@ -208,7 +218,35 @@ namespace GameStoreData.Service
             await _context.SaveChangesAsync();
         }
 
-        public async Task<ICollection<Comment>> LoadGameCommentsById(int id)
+        public virtual async Task DeleteInactiveComments(IEnumerable<Comment> comments)
+        {
+            var inactiveComments = comments.Where(c => !c.IsActive);
+            foreach (var c in inactiveComments)
+            {
+                await DeleteCommentAsync(c);
+            }
+        }
+
+        public async Task<Game> GetGameAndDeleteInactiveComments(bool isRedirected, int gameId)
+        {
+            var game = await GetGameByIdAsync(gameId);
+            var comments = await LoadGameCommentsById(gameId);
+
+            if (!isRedirected)
+            {
+                await DeleteInactiveComments(comments);
+            }
+
+            game.CommentVM = new CommentVM
+            {
+                GameId = game.Id,
+                GameComments = comments
+            };
+
+            return game;
+        }
+
+        public virtual async Task<ICollection<Comment>> LoadGameCommentsById(int id)
         {
             return await _context.Comments.Where(c => c.GameId == id).ToListAsync();
         }
