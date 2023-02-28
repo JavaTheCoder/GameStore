@@ -1,4 +1,5 @@
 using GameStoreData.Identity.Data;
+using GameStoreData.Repository;
 using GameStoreData.Service;
 using GameStoreWeb;
 using Microsoft.AspNetCore.Identity;
@@ -21,7 +22,8 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-builder.Services.AddScoped<GameService>();
+builder.Services.AddScoped<IGameRepository, GameRepository>();
+builder.Services.AddScoped<IGameService, GameService>();
 
 var app = builder.Build();
 

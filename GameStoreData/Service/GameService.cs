@@ -1,46 +1,33 @@
-﻿using GameStoreData.Identity.Data;
-using GameStoreData.Models;
+﻿using GameStoreData.Models;
+using GameStoreData.Repository;
 using GameStoreData.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 
 #nullable disable
 namespace GameStoreData.Service
 {
-    public class GameService
+    public class GameService : IGameService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IGameRepository _repository;
 
-        public GameService()
+        public GameService(IGameRepository repository)
         {
-        }
-
-        public GameService(ApplicationDbContext context)
-        {
-            _context = context;
+            _repository = repository;
         }
 
         public virtual async Task<Game> GetGameByIdAsync(int id)
         {
-            return await _context.Games
-                .Include(g => g.Genres)
-                .FirstOrDefaultAsync(g => g.Id == id);
+            return await _repository.GetGameByIdAsync(id);
         }
 
         public async Task<List<Game>> GetGamesAsync()
         {
-            return await _context.Games.Include(g => g.Genres).ToListAsync();
+            return await _repository.GetAllGamesAsync();
         }
 
         public async Task DeleteGameAsync(int id)
         {
-            var game = await GetGameByIdAsync(id);
-            var gameComments = _context.Comments.Where(c => c.GameId == game.Id);
-
-            _context.Games.Remove(game);
-            _context.Comments.RemoveRange(gameComments);
-
-            await _context.SaveChangesAsync();
+            await _repository.DeleteGameAsync(id);
         }
 
         public async Task<Game> CreateGameAsync(GameVM gameVM)
@@ -63,15 +50,31 @@ namespace GameStoreData.Service
             return game;
         }
 
+        public async Task<GameVM> CreateGameVMAsync(Game game)
+        {
+            var gameVM = new GameVM
+            {
+                Id = game.Id,
+                Image = game.Image,
+                Name = game.Name,
+                Price = game.Price,
+                Genres = game.Genres
+            };
+
+            gameVM = InitializeGenresList(gameVM, await GetGenresAsync());
+            gameVM.SelectedGenreIds = game.Genres.Select(g => g.Id).ToList();
+
+            return gameVM;
+        }
+
         public async Task CreateNewGameAsync(Game game)
         {
-            _context.Games.Add(game);
-            await _context.SaveChangesAsync();
+            await _repository.CreateNewGameAsync(game);
         }
 
         public async Task UpdateGameAsync(Game game)
         {
-            var gameToUpdate = await GetGameByIdAsync(game.Id);
+            var gameToUpdate = await _repository.GetGameByIdAsync(game.Id);
             gameToUpdate.Name = game.Name;
             gameToUpdate.Price = game.Price;
             gameToUpdate.Image = game.Image;
@@ -92,47 +95,22 @@ namespace GameStoreData.Service
                 }
             }
 
-            await _context.SaveChangesAsync();
+            await _repository.UpdateGameAsync();
         }
 
         public async Task<List<Genre>> GetGenresAsync()
         {
-            return await _context.Genres.ToListAsync();
+            return await _repository.GetAllGenresAsync();
         }
 
         public async Task<Genre> GetGenreByIdAsync(int id)
         {
-            return await _context.Genres
-                .Include(g => g.Games)
-                .FirstOrDefaultAsync(g => g.Id == id);
-        }
-
-        public async Task<GameVM> CreateGameVMAsync(Game game)
-        {
-            var gameVM = new GameVM
-            {
-                Id = game.Id,
-                Image = game.Image,
-                Name = game.Name,
-                Price = game.Price,
-                Genres = game.Genres
-            };
-
-            gameVM = InitializeGenresList(gameVM, await GetGenresAsync());
-            gameVM.SelectedGenreIds = game.Genres.Select(g => g.Id).ToList();
-
-            return gameVM;
+            return await _repository.GetGenreByIdAsync(id);
         }
 
         public async Task<ICollection<Game>> GetGamesWithSelectedGenresAsync(ICollection<int> selectedGenresIds)
         {
-            return await _context.Games
-                .AsNoTracking()
-                .Include(g => g.Genres)
-                .Where(g => g.Genres
-                .Any(g => selectedGenresIds
-                .Contains(g.Id)))
-                .ToListAsync();
+            return await _repository.GetGamesWithSelectedGenresAsync(selectedGenresIds);
         }
 
         public GameVM InitializeGenresList(GameVM gameVM, List<Genre> genres)
@@ -143,57 +121,34 @@ namespace GameStoreData.Service
             return gameVM;
         }
 
-        public virtual async Task AddNewCartAsync(CartItem cartItem)
+        public virtual async Task AddNewCartItemAsync(CartItem cartItem)
         {
-            _context.Add(cartItem);
-            await _context.SaveChangesAsync();
+            await _repository.AddNewCartAsync(cartItem);
         }
 
-        public virtual async Task UpdateCartAsync(CartItem cartItem)
+        public virtual async Task<CartItem> UpdateCartItemAsync(CartItem updatedCart)
         {
-            GetOldCartWithUpdatedQuantity(cartItem);
-            await _context.SaveChangesAsync();
+            return await _repository.UpdateCartAsync(updatedCart);
         }
 
-        public CartItem GetOldCartWithUpdatedQuantity(CartItem cartItem)
+        public virtual CartItem GetCartItemByIdAndUsername(string userName, int id)
         {
-            var oldCart = GetCartByIdAndUsername(cartItem.Username, cartItem.Id);
-            oldCart.Quantity = cartItem.Quantity;
-            return oldCart;
-        }
-
-        public CartItem GetCartByIdAndUsername(string userName, int id)
-        {
-            return _context.UsersCartItems
-                .Include(c => c.GameInCart)
-                .Where(c => c.Username == userName)
-                .FirstOrDefault(c => c.Id == id);
+            return _repository.GetCartItemByIdAndUsername(userName, id);
         }
 
         public virtual IEnumerable<CartItem> GetAllCartItemsByUsername(string userName)
         {
-            return _context.UsersCartItems
-                .Include(c => c.GameInCart)
-                .Where(c => c.Username == userName);
+            return _repository.GetAllCartItemsByUsername(userName);
         }
 
         public async Task RemoveCartItemFromUserAsync(CartItem cart)
         {
-            _context.UsersCartItems.Remove(cart);
-            await _context.SaveChangesAsync();
+            await _repository.RemoveCartItemFromUserAsync(cart);
         }
 
         public async Task ClearAllCartItemsAsync(string userName)
         {
-            var cart = _context.UsersCartItems.Where(c => c.Username == userName);
-            if (cart != null)
-            {
-                foreach (var item in _context.UsersCartItems)
-                {
-                    _context.UsersCartItems.Remove(item);
-                }
-                await _context.SaveChangesAsync();
-            }
+            await _repository.ClearAllCartItemsAsync(userName);
         }
 
         public async Task AddCommentAsync(CommentVM commentVM, string userId)
@@ -207,24 +162,12 @@ namespace GameStoreData.Service
                 ParentCommentId = commentVM.ParentCommentId
             };
 
-            _context.Comments.Add(comment);
-            await _context.SaveChangesAsync();
+            await _repository.AddCommentAsync(comment);
         }
 
         public async Task UpdateCommentAsync(CommentVM commentVM)
         {
-            var comment = _context.Comments.FirstOrDefault(c => c.Id == commentVM.CommentVMId);
-            comment.Body = commentVM.Body;
-            await _context.SaveChangesAsync();
-        }
-
-        public virtual async Task DeleteInactiveComments(IEnumerable<Comment> comments)
-        {
-            var inactiveComments = comments.Where(c => !c.IsActive);
-            foreach (var c in inactiveComments)
-            {
-                await DeleteCommentAsync(c);
-            }
+            await _repository.UpdateCommentAsync(commentVM);
         }
 
         public async Task<Game> GetGameAndDeleteInactiveComments(bool isRedirected, int gameId)
@@ -234,13 +177,13 @@ namespace GameStoreData.Service
 
             if (!isRedirected)
             {
-                await DeleteInactiveComments(comments);
+                await _repository.DeleteInactiveComments(comments);
             }
 
             game.CommentVM = new CommentVM
             {
                 GameId = game.Id,
-                GameComments = comments
+                GameComments = await LoadGameCommentsById(gameId)
             };
 
             return game;
@@ -248,39 +191,22 @@ namespace GameStoreData.Service
 
         public virtual async Task<ICollection<Comment>> LoadGameCommentsById(int id)
         {
-            return await _context.Comments.Where(c => c.GameId == id).ToListAsync();
+            return await _repository.LoadGameCommentsById(id);
         }
 
         public async Task DeleteCommentAsync(Comment comment)
         {
-            if (comment.ChildComments != null)
-            {
-                var children = await _context.Comments
-                    .Include(c => c.ChildComments)
-                    .Where(c => c.ParentCommentId == comment.Id)
-                    .ToListAsync();
-
-                foreach (var child in children)
-                {
-                    await DeleteCommentAsync(child);
-                }
-            }
-
-            _context.Comments.Remove(comment);
-            await _context.SaveChangesAsync();
+            await _repository.DeleteCommentAsync(comment);
         }
 
         public async Task<Comment> GetCommentByIdAsync(int id)
         {
-            return await _context.Comments
-                .Include(c => c.ChildComments)
-                .FirstOrDefaultAsync(c => c.Id == id);
+            return await _repository.GetCommentByIdAsync(id);
         }
 
         public async Task ChangeCommentStateAsync(Comment comment)
         {
-            comment.IsActive = !comment.IsActive;
-            await _context.SaveChangesAsync();
+            await _repository.ChangeCommentStateAsync(comment);
         }
     }
 }

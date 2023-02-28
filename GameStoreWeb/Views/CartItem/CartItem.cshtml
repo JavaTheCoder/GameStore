@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<GameStoreData.Models.CartItem>
 
 @{
-    ViewData["Title"] = "Cart";
+    ViewData["Title"] = "CartItem";
     string CalculateTotal()
     {
         double price = 0;
@@ -41,7 +41,7 @@ else
             </p>
             <div style="margin-top:15px; text-align:center;">
                 <a class="button" asp-action="IncreaseGameCount" asp-route-id="@item.Id">+</a>
-                <a class="button" asp-action="RemoveGameFromCart" asp-route-id="@item.Id">×</a>
+                <a class="button" asp-action="RemoveCartItem" asp-route-id="@item.Id">×</a>
                 <a class="button" asp-action="DecreaseGameCount" asp-route-id="@item.Id">-</a>
             </div>
         </div>

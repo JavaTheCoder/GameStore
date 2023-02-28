@@ -56,7 +56,7 @@
             <div style="margin-top:15px; text-align:center;">
                 @if(SignInManager.IsSignedIn(User))
                 {
-                    <a class="buygame" asp-controller="Cart" asp-action="AddToCart" asp-route-id="@item.Id">Add</a>
+                    <a class="buygame" asp-controller="CartItem" asp-action="AddGameToCart" asp-route-id="@item.Id">Add</a>
                     @if (!hideChangeBtns)
                     {
                         <a class="button" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
@@ -65,7 +65,7 @@
                 }
                 else
                 {
-                    <a class="buygame" asp-controller="Cart" asp-action="BuyGames" asp-route-id="@item.Id">Buy</a>
+                    <a class="buygame" asp-controller="CartItem" asp-action="BuyGames" asp-route-id="@item.Id">Buy</a>
                 }
                 </div>
         </div>

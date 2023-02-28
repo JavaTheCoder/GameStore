@@ -4,14 +4,14 @@
 
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
-@inject GameService GameService
+@inject IGameService GameService
 
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User)) 
 {
     <li class="nav-item" style="margin-right:15px; margin-top:8px;">
-        <a asp-controller="Cart" asp-action="GetAllCartItems" style="text-decoration:none">🛒</a> @(GameService
-        .GetAllCartItemsByUsername(UserManager.GetUserAsync(User).Result.UserName).Count())
+        <a asp-controller="CartItem" asp-action="GetAllCartItems" style="text-decoration:none">🛒</a> @(GameService
+        .GetAllCartItemsByUsername(UserManager.GetUserName(User)).Count())
     </li>
     <li class="nav-item">
             <img src="@UserManager.GetUserAsync(User).Result.ImageURL" class="avatar"
@@ -31,9 +31,6 @@
 }
 else
 {
-   @* <li class="nav-item"> 
-        <a class="nav-link text-dark" id="register" asp-area="Identity" asp-page="/Account/Register">Register</a>
-    </li>*@
     <li class="nav-item">
         <a class="nav-link text-dark" id="login" asp-area="Identity" asp-page="/Account/Login">Sign In</a>
     </li>

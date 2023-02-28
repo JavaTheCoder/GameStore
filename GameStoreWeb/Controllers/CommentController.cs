@@ -9,10 +9,10 @@ namespace GameStoreWeb.Controllers
 {
     public class CommentController : Controller
     {
-        private readonly GameService _service;
+        private readonly IGameService _service;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public CommentController(GameService service, UserManager<ApplicationUser> userManager)
+        public CommentController(IGameService service, UserManager<ApplicationUser> userManager)
         {
             _service = service;
             _userManager = userManager;

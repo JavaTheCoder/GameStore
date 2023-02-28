@@ -7,36 +7,34 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GameStoreWeb.Controllers
 {
-    public class CartController : Controller
+    public class CartItemController : Controller
     {
-        private readonly GameService _service;
+        private readonly IGameService _service;
         private readonly UserManager<ApplicationUser> _userManager;
-        //private readonly string username;
 
-        public CartController(GameService service, UserManager<ApplicationUser> userManager)
+        public CartItemController(IGameService service, UserManager<ApplicationUser> userManager)
         {
             _service = service;
             _userManager = userManager;
-            //username = userManager.GetUserAsync(User).Result.UserName;
         }
 
-        // TODO: TEST THIS METHOD
         [HttpGet]
-        public async Task<IActionResult> AddToCart(int id)
+        public async Task<IActionResult> AddGameToCart(int id)
         {
-            string username = _userManager.GetUserAsync(User).Result.UserName;
+            string username = _userManager.GetUserName(User);
             var game = await _service.GetGameByIdAsync(id);
 
             var cartItem = _service.GetAllCartItemsByUsername(username)
                 .FirstOrDefault(c => c?.GameInCart?.Name == game.Name);
+
             if (cartItem != null)
             {
                 cartItem.Quantity += 1;
-                await _service.UpdateCartAsync(cartItem);
+                await _service.UpdateCartItemAsync(cartItem);
                 return RedirectToAction("ListGames", "Game");
             }
 
-            await _service.AddNewCartAsync(
+            await _service.AddNewCartItemAsync(
                 new CartItem
                 {
                     Quantity = 1,
@@ -55,44 +53,45 @@ namespace GameStoreWeb.Controllers
                 return RedirectToAction("BuyGames");
             }
 
-            string username = _userManager.GetUserAsync(User).Result.UserName;
+            string username = _userManager.GetUserName(User);
             var cartItems = _service.GetAllCartItemsByUsername(username);
-            return View("Cart", cartItems);
+            return View("CartItem", cartItems);
         }
 
         public async Task<IActionResult> IncreaseGameCount(int id)
         {
-            string username = _userManager.GetUserAsync(User).Result.UserName;
-            var cart = _service.GetAllCartItemsByUsername(username)
+            string username = _userManager.GetUserName(User);
+            var cartItem = _service.GetAllCartItemsByUsername(username)
                 .FirstOrDefault(c => c.Id == id);
-            cart.Quantity += 1;
+            cartItem.Quantity += 1;
 
-            await _service.UpdateCartAsync(cart);
+            await _service.UpdateCartItemAsync(cartItem);
             return RedirectToAction("GetAllCartItems");
         }
 
         public async Task<IActionResult> DecreaseGameCount(int id)
         {
-            string username = _userManager.GetUserAsync(User).Result.UserName;
-            var cart = _service.GetAllCartItemsByUsername(username)
+            string username = _userManager.GetUserName(User);
+            var cartItem = _service.GetAllCartItemsByUsername(username)
                 .FirstOrDefault(c => c.Id == id);
 
-            if (cart.Quantity > 1)
+            if (cartItem.Quantity > 1)
             {
-                cart.Quantity -= 1;
-                await _service.UpdateCartAsync(cart);
+                cartItem.Quantity -= 1;
+                await _service.UpdateCartItemAsync(cartItem);
             }
             else
             {
-                await _service.RemoveCartItemFromUserAsync(cart);
+                await _service.RemoveCartItemFromUserAsync(cartItem);
             }
 
             return RedirectToAction("GetAllCartItems");
         }
 
-        public async Task<IActionResult> RemoveGameFromCart(int id)
+        public async Task<IActionResult> RemoveCartItem(int id)
         {
-            string username = _userManager.GetUserAsync(User).Result.UserName;
+            string username = _userManager.GetUserName(User);
+
             var cart = _service.GetAllCartItemsByUsername(username)
                 .FirstOrDefault(c => c.Id == id);
 
@@ -104,12 +103,13 @@ namespace GameStoreWeb.Controllers
         public ActionResult<CustomerVM> BuyGames()
         {
             var customerVM = new CustomerVM();
-            if (_userManager.GetUserName(User) == null)
+            string username = _userManager.GetUserName(User);
+            if (username == null)
             {
                 return View("BuyGames", customerVM);
             }
 
-            if (!_service.GetAllCartItemsByUsername(_userManager.GetUserName(User)).Any())
+            if (!_service.GetAllCartItemsByUsername(username).Any())
             {
                 return RedirectToAction("ListGames", "Game");
             }
@@ -120,13 +120,12 @@ namespace GameStoreWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> OrderGames(CustomerVM customerVM)
         {
-            if (_userManager.GetUserAsync(User).Result == null)
+            string username = _userManager.GetUserName(User);
+            if (username != null)
             {
-                return RedirectToAction("ListGames", "Game");
+                await _service.ClearAllCartItemsAsync(username);
             }
 
-            string username = _userManager.GetUserAsync(User).Result.UserName;
-            await _service.ClearAllCartItemsAsync(username);
             return RedirectToAction("ListGames", "Game");
         }
     }

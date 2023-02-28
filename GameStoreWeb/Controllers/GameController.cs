@@ -8,9 +8,9 @@ namespace GameStoreWeb.Controllers
 {
     public class GameController : Controller
     {
-        private readonly GameService _service;
+        private readonly IGameService _service;
 
-        public GameController(GameService service)
+        public GameController(IGameService service)
         {
             _service = service;
         }
@@ -82,7 +82,6 @@ namespace GameStoreWeb.Controllers
         public async Task<IActionResult> Details(int id)
         {
             TempData.TryGetValue("IsRedirected", out var isRedirected);
-
             var game = await _service.GetGameAndDeleteInactiveComments((bool?)isRedirected ?? false, id);
             TempData["IsRedirected"] = false;
 

@@ -36,7 +36,8 @@
             <div class="form-group">
                 @Html.LabelFor(model => model.PaymentType)
                 <div class="col-sm-6">
-                    @Html.DropDownListFor(m => m.PaymentType, new SelectList(Enum.GetValues(typeof(PaymentType))))
+                    @Html.DropDownListFor(m => m.PaymentType, 
+                        new SelectList(Enum.GetValues(typeof(PaymentType))))
                 </div>
             </div>
 
@@ -48,7 +49,7 @@
 
             <div class="form-group">
                 <input type="submit" value="Order" class="button" />
-                <a asp-controller="Game" asp-action="Index" class="button">Cancel</a>
+                <a asp-controller="CartItem" asp-action="GetAllCartItems" class="button">Cancel</a>
             </div>
         </form>
     </div>

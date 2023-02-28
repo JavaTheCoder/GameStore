@@ -4,7 +4,7 @@
 
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
-@inject GameService GameService
+@inject IGameService GameService
 
 @model GameStoreData.Models.Game
 
@@ -29,16 +29,16 @@
             <div>
                 @if (SignInManager.IsSignedIn(User))
                 {
-                   @if (!UserManager.GetRolesAsync(UserManager
-                   .GetUserAsync(User).Result).Result.Contains("User"))
-                   {
+                    @if (!UserManager.GetRolesAsync(UserManager
+                    .GetUserAsync(User).Result).Result.Contains("User"))
+                    {
                         <a asp-action="Edit" asp-route-id="@Model?.Id" class="button">Update</a>
-                   }
-                   <a asp-controller="Cart" asp-action="AddToCart" asp-route-id="@Model?.Id" class="buygame">Add to Cart</a>
+                    }
+                    <a asp-controller="CartItem" asp-action="AddGameToCart" asp-route-id="@Model?.Id" class="buygame">Add to Cart</a>
                 }
                 else
                 {
-                    <a asp-controller="Cart" asp-action="BuyGames" asp-route-id="@Model?.Id" class="buygame">Buy</a>
+                    <a asp-controller="CartItem" asp-action="BuyGames" asp-route-id="@Model?.Id" class="buygame">Buy</a>
                 }
                 <a asp-action="Index" asp-controller="Game" class="button">Go Back</a>
             </div>
@@ -47,5 +47,5 @@
 </div>
 
 @{
-    <partial name="_CommentsPartial" model="@Model.CommentVM" />
+    <partial name="_CommentsPartial" model="@Model?.CommentVM" />
 }
