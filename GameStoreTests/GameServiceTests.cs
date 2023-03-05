@@ -14,14 +14,17 @@ namespace GameStoreTests
         private Mock<GameService> _service;
         private Mock<IGameRepository> _repository;
         private Mock<UserManager<ApplicationUser>> _userManager;
+
+        private UserController _userController;
         private CartItemController _cartItemController;
 
         private Game _testGame;
         private CartItem _testCartItem;
+        private Comment _testComment;
 
         [SetUp]
         public void Setup()
-        {//there
+        {
             _repository = new Mock<IGameRepository>();
             _service = new Mock<GameService>(_repository.Object);
             _service.CallBase = true;
@@ -29,6 +32,7 @@ namespace GameStoreTests
             _userManager = new Mock<UserManager<ApplicationUser>>(Mock.Of<IUserStore<ApplicationUser>>(),
                 null, null, null, null, null, null, null, null);
             _cartItemController = new CartItemController(_service.Object, _userManager.Object);
+            _userController = new UserController(_userManager.Object);
 
             _testGame = new Game
             {
@@ -42,13 +46,17 @@ namespace GameStoreTests
                 Username = "barrywhite",
                 GameInCart = _testGame
             };
-
-            _repository.Setup(r => r.GetGameByIdAsync(It.IsAny<int>())).ReturnsAsync(_testGame);
-
-            _service.Setup(s => s.LoadGameCommentsById(It.IsAny<int>())).ReturnsAsync(new List<Comment>
+            _testComment = new Comment
             {
-                new Comment { Id = 1, Body = "Test Comment" }
-            });
+                Id = 1,
+                Body = "Test Comment"
+            };
+
+            _repository.Setup(r => r.GetGameByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync(_testGame);
+
+            _service.Setup(s => s.LoadGameCommentsById(It.IsAny<int>()))
+                .ReturnsAsync(new List<Comment> { _testComment });
 
             _service.Setup(s => s.AddNewCartItemAsync(It.IsAny<CartItem>()));
 
@@ -57,6 +65,9 @@ namespace GameStoreTests
             _repository.Setup(r => r.DeleteInactiveComments(It.IsAny<ICollection<Comment>>()));
 
             _userManager.Setup(u => u.GetUserName(It.IsAny<ClaimsPrincipal>()));
+
+            _userManager.Setup(u => u.GetRolesAsync(It.IsAny<ApplicationUser>()))
+                .ReturnsAsync(new List<string> { "User" });
         }
 
         [Test]
@@ -64,6 +75,22 @@ namespace GameStoreTests
         {
             var game = await _service.Object.GetGameAndDeleteInactiveComments(true, 1);
             _repository.Verify(r => r.DeleteInactiveComments(It.IsAny<ICollection<Comment>>()), Times.Never);
+        }
+
+        [Test]
+        public async Task ElevateUserToManager_RoleChangesToManager()
+        {
+            await _userController.ElevateUserToManager("johnsnow");
+            _userManager.Verify(u => u.RemoveFromRolesAsync(It.IsAny<ApplicationUser>(), It.IsAny<IEnumerable<string>>()), Times.Once);
+            _userManager.Verify(u => u.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [Test]
+        public async Task ElevateUserToAdmin_RoleChangesToAdmin()
+        {
+            await _userController.ElevateUserToAdmin("barrywhite");
+            _userManager.Verify(u => u.RemoveFromRolesAsync(It.IsAny<ApplicationUser>(), It.IsAny<IEnumerable<string>>()), Times.Once);
+            _userManager.Verify(u => u.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Once);
         }
 
         [Test]

@@ -1,9 +1,7 @@
-﻿using GameStoreData.Identity.Data;
-using GameStoreData.Models;
+﻿using GameStoreData.Models;
 using GameStoreData.Service;
 using GameStoreData.ViewModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 
@@ -12,49 +10,16 @@ namespace GameStoreWeb.Controllers
     public class GameController : Controller
     {
         private readonly IGameService _service;
-        private readonly UserManager<ApplicationUser> _userManager;
 
-        public GameController(IGameService service, UserManager<ApplicationUser> userManager)
+        public GameController(IGameService service)
         {
             _service = service;
-            _userManager = userManager;
         }
 
         public IActionResult Index()
         {
             return RedirectToAction("ListGames");
         }
-
-        // ----------------------------------------------------
-        [Authorize(Roles = "Admin")]
-        public IActionResult ElevateUsers()
-        {
-            var users = _userManager.Users.ToList();
-            return View(users);
-        }
-
-        public async Task<IActionResult> ElevateUserToAdmin(string username)
-        {
-            var user = _userManager.Users.FirstOrDefault(u => u.UserName == username);
-            var roles = await _userManager.GetRolesAsync(user);
-
-            await _userManager.RemoveFromRolesAsync(user, roles);
-            await _userManager.AddToRoleAsync(user, "Admin");
-
-            return RedirectToAction("ListGames");
-        }
-
-        public async Task<IActionResult> ElevateUserToManager(string username)
-        {
-            var user = _userManager.Users.FirstOrDefault(u => u.UserName == username);
-            var roles = await _userManager.GetRolesAsync(user);
-
-            await _userManager.RemoveFromRolesAsync(user, roles);
-            await _userManager.AddToRoleAsync(user, "Manager");
-
-            return RedirectToAction("ListGames");
-        }
-        // ----------------------------------------------------
 
         [HttpGet("Create")]
         [Authorize(Roles = "Admin, Manager")]

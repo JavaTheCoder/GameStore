@@ -12,7 +12,7 @@
     if (UserManager.GetRolesAsync(UserManager.GetUserAsync(User).Result).Result.Contains("Admin"))
     {
         <li class="nav-item" style="margin-right:15px; margin-top:8px;">
-            <a asp-controller="Game" asp-action="ElevateUsers" style="text-decoration:none">Elevate Users</a>
+            <a asp-controller="User" asp-action="ElevateUsers" style="text-decoration:none">Elevate Users</a>
         </li>
     }
 
