@@ -1,6 +1,4 @@
-﻿using GameStoreData.Models;
-using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace GameStoreData.Identity.Data;
 

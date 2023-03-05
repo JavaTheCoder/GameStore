@@ -1,0 +1,23 @@
+﻿@using GameStoreData.Identity.Data;
+@using Microsoft.AspNetCore.Identity;
+
+@model IEnumerable<GameStoreData.Identity.Data.ApplicationUser>
+@inject UserManager<ApplicationUser> UserManager
+
+<div>
+    @foreach (var user in Model.Where(u => !UserManager.GetRolesAsync(u).Result.Contains("Admin")))
+    {
+        <div class="games-list">
+            <img src="@user.ImageURL" style="height:200px;width:200px" alt="image" onclick="imgClick(@user.Id)">
+            <p class="details" style="font-weight:bold;width:200px">@(user.UserName)</p>
+            <p class="details" style="font-weight:bold;width:200px">@(String.Join("/", UserManager.GetRolesAsync(user).Result))</p>
+            <div style="margin-top:15px;width:71%;margin-left:25px;">
+                @if (!UserManager.GetRolesAsync(user).Result.Contains("Manager"))
+                {
+                    <a class="button" asp-action="ElevateUserToManager" asp-route-username="@user.UserName">Elevate to Manager</a>
+                }
+                <a class="button" asp-action="ElevateUserToAdmin" asp-route-username="@user.UserName">Elevate to Admin</a>
+            </div>
+        </div>
+    }
+</div>

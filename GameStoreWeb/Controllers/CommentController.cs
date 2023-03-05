@@ -48,14 +48,7 @@ namespace GameStoreWeb.Controllers
         public async Task<IActionResult> ChangeCommentState(int id)
         {
             var comment = await _service.GetCommentByIdAsync(id);
-            if (_userManager.GetUserId(User) == comment.UserId
-                || _userManager.GetRolesAsync(_userManager.GetUserAsync(User).Result)
-                                            .Result.Contains("Manager")
-                || _userManager.GetRolesAsync(_userManager.GetUserAsync(User).Result)
-                                            .Result.Contains("Admin"))
-            {
-                await _service.ChangeCommentStateAsync(comment);
-            }
+            await _service.ChangeCommentStateAsync(comment);
 
             TempData["IsRedirected"] = true;
             return RedirectToAction("Details", "Game", new { id = comment.GameId });

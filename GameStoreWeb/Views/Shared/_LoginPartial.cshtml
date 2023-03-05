@@ -7,15 +7,22 @@
 @inject IGameService GameService
 
 <ul class="navbar-nav">
-@if (SignInManager.IsSignedIn(User)) 
+@if (SignInManager.IsSignedIn(User))
 {
+    if (UserManager.GetRolesAsync(UserManager.GetUserAsync(User).Result).Result.Contains("Admin"))
+    {
+        <li class="nav-item" style="margin-right:15px; margin-top:8px;">
+            <a asp-controller="Game" asp-action="ElevateUsers" style="text-decoration:none">Elevate Users</a>
+        </li>
+    }
+
     <li class="nav-item" style="margin-right:15px; margin-top:8px;">
         <a asp-controller="CartItem" asp-action="GetAllCartItems" style="text-decoration:none">🛒</a> @(GameService
         .GetAllCartItemsByUsername(UserManager.GetUserName(User)).Count())
     </li>
     <li class="nav-item">
-            <img src="@UserManager.GetUserAsync(User).Result.ImageURL" class="avatar"
-            onerror="this.src='https://w0.peakpx.com/wallpaper/709/216/HD-wallpaper-pitch-black-dark.jpg'">
+        <img src="@UserManager.GetUserAsync(User).Result.ImageURL" class="avatar"
+        onerror="this.src='https://w0.peakpx.com/wallpaper/709/216/HD-wallpaper-pitch-black-dark.jpg'">
     </li>
     <li class="nav-item">
             <a id="manage" class="nav-link text-dark" asp-area="Identity" 

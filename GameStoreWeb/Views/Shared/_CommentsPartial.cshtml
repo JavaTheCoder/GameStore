@@ -26,9 +26,15 @@
                 <h5>@comment.Body</h5>
 
                 <div style="margin-bottom:15px;">
-                    <a asp-controller="Comment" asp-action="ReplyToComment" asp-route-id="@comment.Id">Reply</a> |
-                    <a asp-controller="Comment" asp-action="UpdateComment" asp-route-id="@comment.Id">Edit</a> |
-                    <a asp-controller="Comment" asp-action="ChangeCommentState" asp-route-id="@comment.Id">Delete</a>
+                    <a asp-controller="Comment" asp-action="ReplyToComment" asp-route-id="@comment.Id">Reply</a>
+
+                    @if ((!SignInManager.IsSignedIn(User) && comment.UserId == null)
+                    || SignInManager.IsSignedIn(User) && (UserManager.FindByIdAsync(comment.UserId).Result == UserManager.GetUserAsync(User).Result
+                    || UserManager.GetRolesAsync(UserManager.GetUserAsync(User).Result).Result.Contains("Manager")))
+                    {
+                        <a asp-controller="Comment" asp-action="UpdateComment" asp-route-id="@comment.Id">Edit</a>
+                        <a asp-controller="Comment" asp-action="ChangeCommentState" asp-route-id="@comment.Id">Delete</a>
+                    }
                 </div>
             </dd>
 
