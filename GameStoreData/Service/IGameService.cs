@@ -5,52 +5,52 @@ namespace GameStoreData.Service
 {
     public interface IGameService
     {
-        public Task<Game> GetGameByIdAsync(int id);
+        Task<Game> GetGameByIdAsync(int id);
 
-        public Task<List<Game>> GetGamesAsync();
+        Task<List<Game>> GetGamesAsync();
 
-        public Task DeleteGameAsync(int id);
+        Task DeleteGameAsync(int id);
 
-        public Task<Game> CreateGameAsync(GameVM gameVM);
+        Task<Game> CreateGameAsync(GameVM gameVM);
 
-        public Task<GameVM> CreateGameVMAsync(Game game);
+        Task<GameVM> CreateGameVMAsync(Game game);
 
-        public Task CreateNewGameAsync(Game game);
+        Task CreateNewGameAsync(Game game);
 
-        public Task UpdateGameAsync(Game game);
+        Task UpdateGameAsync(Game game);
 
-        public Task<List<Genre>> GetGenresAsync();
+        Task<List<Genre>> GetGenresAsync();
 
-        public Task<Genre> GetGenreByIdAsync(int id);
+        Task<Genre> GetGenreByIdAsync(int id);
 
-        public Task<ICollection<Game>> GetGamesWithSelectedGenresAsync(ICollection<int> selectedGenresIds);
+        Task<ICollection<Game>> GetGamesWithSelectedGenresAsync(ICollection<int> selectedGenresIds);
 
-        public GameVM InitializeGenresList(GameVM gameVM, List<Genre> genres);
+        GameVM InitializeGenresList(GameVM gameVM, List<Genre> genres);
 
-        public Task AddNewCartItemAsync(CartItem cartItem);
+        Task AddNewCartItemAsync(CartItem cartItem);
 
-        public Task<CartItem> UpdateCartItemAsync(CartItem updatedCart);
+        Task<CartItem> UpdateCartItemAsync(CartItem updatedCart);
 
-        public CartItem GetCartItemByIdAndUsername(string userName, int id);
+        CartItem GetCartItemByIdAndUsername(string userName, int id);
 
-        public IEnumerable<CartItem> GetAllCartItemsByUsername(string userName);
+        IEnumerable<CartItem> GetAllCartItemsByUsername(string userName);
 
-        public Task RemoveCartItemFromUserAsync(CartItem cart);
+        Task RemoveCartItemFromUserAsync(CartItem cart);
 
-        public Task ClearAllCartItemsAsync(string userName);
+        Task ClearAllCartItemsAsync(string userName);
 
-        public Task AddCommentAsync(CommentVM commentVM, string userId);
+        Task AddCommentAsync(CommentVM commentVM, string userId);
 
-        public Task UpdateCommentAsync(CommentVM commentVM);
+        Task UpdateCommentAsync(CommentVM commentVM);
 
-        public Task<Game> GetGameAndDeleteInactiveComments(bool isRedirected, int gameId);
+        Task<Game> GetGameAndDeleteInactiveComments(bool isRedirected, int gameId);
 
-        public Task<ICollection<Comment>> LoadGameCommentsById(int id);
+        Task<ICollection<Comment>> LoadGameCommentsById(int id);
 
-        public Task DeleteCommentAsync(Comment comment);
+        Task DeleteCommentAsync(Comment comment);
 
-        public Task<Comment> GetCommentByIdAsync(int id);
+        Task<Comment> GetCommentByIdAsync(int id);
 
-        public Task ChangeCommentStateAsync(Comment comment);
+        Task ChangeCommentStateAsync(Comment comment);
     }
 }

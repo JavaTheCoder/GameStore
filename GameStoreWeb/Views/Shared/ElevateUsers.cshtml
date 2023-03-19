@@ -8,7 +8,7 @@
     @foreach (var user in Model.Where(u => !UserManager.GetRolesAsync(u).Result.Contains("Admin")))
     {
         <div class="games-list">
-            <img src="@user.ImageURL" style="height:200px;width:200px" alt="image" onclick="imgClick(@user.Id)">
+            <img src="@user.ImageURL" style="height:200px;width:200px" alt="image">
             <p class="details" style="font-weight:bold;width:200px">@(user.UserName)</p>
             <p class="details" style="font-weight:bold;width:200px">@(String.Join("/", UserManager.GetRolesAsync(user).Result))</p>
             <div style="margin-top:15px;width:200px;margin-left:25px;">

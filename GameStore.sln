@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameStoreWeb", "GameStoreWe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameStoreData", "GameStoreData\GameStoreData.csproj", "{9E8D391F-845D-4549-AF69-ED1D403DE1FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameStoreTests", "GameStoreTests\GameStoreTests.csproj", "{0262436E-8653-418A-AB85-65FB0449A424}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameStoreTests", "GameStoreTests\GameStoreTests.csproj", "{0262436E-8653-418A-AB85-65FB0449A424}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

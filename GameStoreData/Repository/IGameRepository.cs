@@ -6,48 +6,48 @@ namespace GameStoreData.Repository
     public interface IGameRepository
     {
         // -- GAME --
-        public Task<Game> GetGameByIdAsync(int id);
+        Task<Game> GetGameByIdAsync(int id);
 
-        public Task<List<Game>> GetAllGamesAsync();
+        Task<List<Game>> GetAllGamesAsync();
 
-        public Task DeleteGameAsync(int id);
+        Task DeleteGameAsync(int id);
 
-        public Task CreateNewGameAsync(Game game);
+        Task CreateNewGameAsync(Game game);
 
-        public Task UpdateGameAsync();
+        Task UpdateGameAsync();
 
-        public Task<List<Genre>> GetAllGenresAsync();
+        Task<List<Genre>> GetAllGenresAsync();
 
-        public Task<Genre> GetGenreByIdAsync(int id);
+        Task<Genre> GetGenreByIdAsync(int id);
 
-        public Task<ICollection<Game>> GetGamesWithSelectedGenresAsync(ICollection<int> selectedGenresIds);
+        Task<ICollection<Game>> GetGamesWithSelectedGenresAsync(ICollection<int> selectedGenresIds);
 
         // -- CART --
-        public Task AddNewCartAsync(CartItem cartItem);
+        Task AddNewCartAsync(CartItem cartItem);
 
-        public CartItem GetCartItemByIdAndUsername(string userName, int id);
+        CartItem GetCartItemByIdAndUsername(string userName, int id);
 
-        public IEnumerable<CartItem> GetAllCartItemsByUsername(string userName);
+        IEnumerable<CartItem> GetAllCartItemsByUsername(string userName);
 
-        public Task<CartItem> UpdateCartAsync(CartItem updatedCart);
+        Task<CartItem> UpdateCartAsync(CartItem updatedCart);
 
-        public Task RemoveCartItemFromUserAsync(CartItem cart);
+        Task RemoveCartItemFromUserAsync(CartItem cart);
 
-        public Task ClearAllCartItemsAsync(string userName);
+        Task ClearAllCartItemsAsync(string userName);
 
         // -- COMMENT --
-        public Task AddCommentAsync(Comment comment);
+        Task AddCommentAsync(Comment comment);
 
-        public Task UpdateCommentAsync(CommentVM commentVM);
+        Task UpdateCommentAsync(CommentVM commentVM);
 
-        public Task DeleteInactiveComments(IEnumerable<Comment> comments);
+        Task DeleteInactiveComments(IEnumerable<Comment> comments);
 
-        public Task<ICollection<Comment>> LoadGameCommentsById(int id);
+        Task<ICollection<Comment>> LoadGameCommentsById(int id);
 
-        public Task DeleteCommentAsync(Comment comment);
+        Task DeleteCommentAsync(Comment comment);
 
-        public Task<Comment> GetCommentByIdAsync(int id);
+        Task<Comment> GetCommentByIdAsync(int id);
 
-        public Task ChangeCommentStateAsync(Comment comment);
+        Task ChangeCommentStateAsync(Comment comment);
     }
 }

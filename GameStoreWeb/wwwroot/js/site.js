@@ -2,7 +2,13 @@
 // for details on configuring this project to bundle and minify static web assets.
 // Write your JavaScript code.
 function imgClick(id) {
-    window.location.href = `https://localhost:44316/Details/${id}`
+    if (window.location.href.endsWith("FilterGames")) {
+        window.location.href = window.location.href.replace("Game/FilterGames", `Details/${id}`);
+    } else if (window.location.href.endsWith("GetAllCartItems")) {
+        window.location.href = window.location.href.replace("CartItem/GetAllCartItems", `Details/${id}`);
+    } else {
+        window.location.href = window.location.href.replace("Games", `Details/${id}`);
+    }
 }
 
 function handleFilterBtn() {
