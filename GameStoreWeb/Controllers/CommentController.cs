@@ -1,5 +1,4 @@
 ﻿using GameStoreData.Identity.Data;
-using GameStoreData.Models;
 using GameStoreData.Service;
 using GameStoreData.ViewModels;
 using Microsoft.AspNetCore.Identity;

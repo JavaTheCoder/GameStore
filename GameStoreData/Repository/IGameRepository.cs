@@ -5,7 +5,6 @@ namespace GameStoreData.Repository
 {
     public interface IGameRepository
     {
-        // -- GAME --
         Task<Game> GetGameByIdAsync(int id);
 
         Task<List<Game>> GetAllGamesAsync();
@@ -22,7 +21,6 @@ namespace GameStoreData.Repository
 
         Task<ICollection<Game>> GetGamesWithSelectedGenresAsync(ICollection<int> selectedGenresIds);
 
-        // -- CART --
         Task AddNewCartAsync(CartItem cartItem);
 
         CartItem GetCartItemByIdAndUsername(string userName, int id);
@@ -35,7 +33,6 @@ namespace GameStoreData.Repository
 
         Task ClearAllCartItemsAsync(string userName);
 
-        // -- COMMENT --
         Task AddCommentAsync(Comment comment);
 
         Task UpdateCommentAsync(CommentVM commentVM);
